@@ -1,5 +1,10 @@
 ﻿# Punaflow UML Class Diagram
 
+## Overview
+This diagram presents the main classes of the Punaflow project, including their attributes, methods, and relationships.
+
+---
+
 ## Classes
 
 ### User
@@ -62,7 +67,7 @@
 
 ### IRepository<T>
 + GetAll() : List<T>
-+ GetById(int id) : T?
++ GetById(int id) : T
 + Add(T item) : void
 + Save() : void
 
@@ -73,7 +78,7 @@
 
 + FileRepository()
 + GetAll() : List<T>
-+ GetById(int id) : T?
++ GetById(int id) : T
 + Add(T item) : void
 + Save() : void
 
@@ -94,13 +99,16 @@
 ---
 
 ## Relationships
-- User has one WorkerProfile
-- JobRequest connects a client with a worker
-- Contract belongs to a JobRequest
-- FileRepository<T> implements IRepository<T>
-- UserService depends on IRepository<User>
-- Menu interacts with UserService
-- ## Mermaid Diagram
+- A **User** can have one **WorkerProfile**
+- A **JobRequest** connects a client with a worker
+- A **Contract** belongs to one **JobRequest**
+- **FileRepository<T>** implements **IRepository<T>**
+- **UserService** depends on **IRepository<User>**
+- **Menu** uses **UserService**
+
+---
+
+## Mermaid Diagram
 
 ```mermaid
 classDiagram
@@ -182,7 +190,7 @@ class Menu {
   +Start() void
 }
 
-User --> WorkerProfile : has profile
+User "1" --> "0..1" WorkerProfile : has
 JobRequest --> User : client
 JobRequest --> User : worker
 Contract --> JobRequest : belongs to
