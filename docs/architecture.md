@@ -19,7 +19,7 @@ Punaflow is designed using a layered architecture to separate concerns, improve 
 - `Menu.cs`
 
 **Description:**
-This layer is responsible for interacting with the user through a console-based interface. It does not contain business logic.
+This layer is responsible for interacting with the user through a console-based interface. It does not contain business logic and only forwards user actions to the Services layer.
 
 ---
 
@@ -34,7 +34,10 @@ This layer is responsible for interacting with the user through a console-based 
 - `UserService.cs`
 
 **Description:**
-This layer acts as a bridge between the UI and the data layer. It ensures that business rules are applied before data is stored or retrieved.
+This layer acts as an intermediary between the UI and Data layers. It ensures that business rules are applied before data is stored or retrieved.
+
+**Example:**
+- `UserService.AddUser()` validates input and then calls `IRepository<User>.Add()` to store the data.
 
 ---
 
@@ -49,7 +52,7 @@ This layer acts as a bridge between the UI and the data layer. It ensures that b
 - `FileRepository.cs`
 
 **Description:**
-This layer abstracts data access using a generic repository interface. Data is stored and retrieved from CSV files.
+This layer abstracts data access using a generic repository interface. Data is stored and retrieved from CSV files, making the system simple and flexible.
 
 ---
 
@@ -66,7 +69,7 @@ This layer abstracts data access using a generic repository interface. Data is s
 - `Contract.cs`
 
 **Description:**
-Models represent the core entities of the system and are used across all layers.
+Models represent the core entities of the system and are shared across all layers.
 
 ---
 
@@ -82,18 +85,20 @@ The Repository Pattern is used to abstract data access logic from the rest of th
 **Benefits:**
 - Decouples data access from business logic
 - Makes the system easier to maintain and extend
+- Allows switching to a different storage system (e.g., database) without changing other layers
 
 ---
 
 ### Separation of Concerns
 
 Each layer has a clearly defined responsibility:
-- UI → interaction
-- Services → logic
-- Data → storage
-- Models → structure
 
-This improves readability and maintainability.
+- UI → user interaction  
+- Services → business logic  
+- Data → data storage and retrieval  
+- Models → data structure  
+
+This improves readability, maintainability, and scalability.
 
 ---
 
@@ -110,33 +115,44 @@ This improves readability and maintainability.
 ## Design Decisions
 
 ### Why layered architecture?
-To keep the system modular and easy to maintain.
+To keep the system modular, organized, and easy to maintain.
 
 ### Why Repository Pattern?
-To separate data access logic and allow flexibility for future changes (e.g., switching from file storage to database).
+To separate data access logic from business logic and allow flexibility for future changes (e.g., switching from file storage to a database).
 
 ### Why generic repository?
-To reuse the same logic for different models.
+To reuse the same logic across different models and reduce code duplication.
 
 ---
 
-## Conclusion
-
-The architecture of Punaflow ensures a clean separation of responsibilities, making the project easier to understand, maintain, and extend in the future.
 ## SOLID Principles Applied
 
 ### Dependency Inversion Principle (DIP)
 
-The project applies the Dependency Inversion Principle by ensuring that high-level modules do not depend on low-level implementations.
+The system follows the Dependency Inversion Principle by depending on abstractions rather than concrete implementations.
 
 For example:
 
 - `UserService` depends on `IRepository<User>`
 - It does not depend directly on `FileRepository<User>`
 
-This allows the data storage implementation to be changed (e.g., from file-based storage to a database) without modifying the business logic.
+This allows different data storage implementations (e.g., database instead of CSV files) to be used without modifying business logic.
 
-**Benefits:**
-- Loose coupling
-- Easier testing
-- Better scalability
+---
+
+### Single Responsibility Principle (SRP)
+
+Each layer has a single responsibility:
+
+- UI handles user interaction  
+- Services handle business logic  
+- Data handles storage  
+- Models define data structure  
+
+This ensures that each component is easier to maintain and modify independently.
+
+---
+
+## Conclusion
+
+The architecture of Punaflow ensures a clean separation of responsibilities, making the project easy to understand, maintain, and extend in the future.
