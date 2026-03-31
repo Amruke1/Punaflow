@@ -2,22 +2,26 @@
 {
     public class User
     {
-        private int id;
-        private string name;
-        private string email;
-        private string role;
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public decimal Price { get; set; }
+        public string Role { get; set; }
 
-        public User(int id, string name, string email, string role)
+        public User()
         {
-            this.id = id;
-            this.name = name;
-            this.email = email;
-            this.role = role;
+            Name = "";
+            Email = "";
+            Role = "";
         }
 
-        public int GetId() => id;
-        public string GetName() => name;
-        public string GetEmail() => email;
-        public string GetRole() => role;
+        public User(int id, string name, string email, decimal price, string role)
+        {
+            Id = id;
+            Name = name;
+            Email = email;
+            Price = price;
+            Role = role;
+        }
     }
 }

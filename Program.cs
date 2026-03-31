@@ -1,12 +1,18 @@
-﻿using Punaflow.UI;
+﻿using Punaflow.Data;
+using Punaflow.Models;
+using Punaflow.Services;
+using Punaflow.UI;
 
 namespace Punaflow
 {
-    internal class Program
+    class Program
     {
         static void Main(string[] args)
         {
-            Menu menu = new Menu();
+            IRepository<User> repository = new FileRepository("Data/users.csv");
+            UserServices service = new UserServices(repository);
+            Menu menu = new Menu(service);
+
             menu.Start();
         }
     }

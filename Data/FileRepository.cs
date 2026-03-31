@@ -1,35 +1,102 @@
-﻿using System.Collections.Generic;
+﻿using Punaflow.Models;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 
 namespace Punaflow.Data
 {
-    public class FileRepository<T> : IRepository<T>
+    public class FileRepository : IRepository<User>
     {
-        private List<T> items;
+        private readonly string filePath;
+        private List<User> items;
 
-        public FileRepository()
+        public FileRepository(string filePath)
         {
-            items = new List<T>();
+            this.filePath = filePath;
+            items = LoadFromFile();
         }
 
-        public List<T> GetAll()
+        private List<User> LoadFromFile()
+        {
+            var users = new List<User>();
+
+            if (!File.Exists(filePath))
+                return users;
+
+            var lines = File.ReadAllLines(filePath).Skip(1);
+
+            foreach (var line in lines)
+            {
+                var parts = line.Split(',');
+
+                if (parts.Length >= 5)
+                {
+                    users.Add(new User(
+                        int.Parse(parts[0]),
+                        parts[1],
+                        parts[2],
+                        decimal.Parse(parts[3], CultureInfo.InvariantCulture),
+                        parts[4]
+                    ));
+                }
+            }
+
+            return users;
+        }
+
+        public List<User> GetAll()
         {
             return items;
         }
 
-        public T GetById(int id)
+        public User GetById(int id)
         {
-            return items.FirstOrDefault();
+            return items.FirstOrDefault(x => x.Id == id);
         }
 
-        public void Add(T item)
+        public void Add(User item)
         {
             items.Add(item);
         }
 
+        public void Update(User item)
+        {
+            var existing = items.FirstOrDefault(x => x.Id == item.Id);
+
+            if (existing != null)
+            {
+                existing.Name = item.Name;
+                existing.Email = item.Email;
+                existing.Price = item.Price;
+                existing.Role = item.Role;
+            }
+        }
+
+        public void Delete(int id)
+        {
+            var existing = items.FirstOrDefault(x => x.Id == id);
+
+            if (existing != null)
+            {
+                items.Remove(existing);
+            }
+        }
+
         public void Save()
         {
-            // optional
+            var lines = new List<string>();
+            lines.Add("Id,Name,Email,Price,Role");
+
+            lines.AddRange(items.Select(x =>
+                string.Format("{0},{1},{2},{3},{4}",
+                    x.Id,
+                    x.Name,
+                    x.Email,
+                    x.Price.ToString(CultureInfo.InvariantCulture),
+                    x.Role)));
+
+            File.WriteAllLines(filePath, lines);
         }
     }
 }

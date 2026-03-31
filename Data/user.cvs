@@ -1,0 +1,6 @@
+﻿Id,Name,Email,Price,Role
+1,Amra,amra@email.com,20,Client
+2,John,john@email.com,15,Worker
+3,Anna,anna@email.com,25,Worker
+4,Mark,mark@email.com,30,Client
+5,Lisa,lisa@email.com,18,Worker
