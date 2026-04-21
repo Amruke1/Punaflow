@@ -6,9 +6,9 @@ namespace Punaflow.UI
 {
     public class Menu
     {
-        private readonly UserServices service;
+        private readonly UserService service;
 
-        public Menu(UserServices service)
+        public Menu(UserService service)
         {
             this.service = service;
         }
@@ -61,30 +61,36 @@ namespace Punaflow.UI
 
             var users = service.Listo(filter);
 
+            if (users.Count == 0)
+            {
+                Console.WriteLine("Nuk u gjet asnjë përdorues.");
+                return;
+            }
+
             foreach (var user in users)
             {
-                Console.WriteLine(user.Id + " | " + user.Name + " | " + user.Email + " | " + user.Price + "€ | " + user.Role);
+                Console.WriteLine($"{user.Id} | {user.Name} | {user.Email} | {user.Price}€ | {user.Role}");
             }
         }
 
         private void FindById()
         {
             Console.Write("ID: ");
-            int id;
-
-            if (int.TryParse(Console.ReadLine(), out id))
-            {
-                var user = service.GjejSipasId(id);
-
-                if (user == null)
-                    Console.WriteLine("Përdoruesi nuk u gjet.");
-                else
-                    Console.WriteLine(user.Id + " | " + user.Name + " | " + user.Email + " | " + user.Price + "€ | " + user.Role);
-            }
-            else
+            if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("ID jo valide.");
+                return;
             }
+
+            var user = service.GjejSipasId(id);
+
+            if (user == null)
+            {
+                Console.WriteLine("Përdoruesi nuk u gjet.");
+                return;
+            }
+
+            Console.WriteLine($"{user.Id} | {user.Name} | {user.Email} | {user.Price}€ | {user.Role}");
         }
 
         private void AddUser()
@@ -100,7 +106,12 @@ namespace Punaflow.UI
                 user.Email = Console.ReadLine();
 
                 Console.Write("Çmimi: ");
-                user.Price = decimal.Parse(Console.ReadLine() ?? "0");
+                if (!decimal.TryParse(Console.ReadLine(), out decimal price))
+                {
+                    Console.WriteLine("Çmimi jo valid.");
+                    return;
+                }
+                user.Price = price;
 
                 Console.Write("Roli: ");
                 user.Role = Console.ReadLine();
@@ -119,7 +130,11 @@ namespace Punaflow.UI
             try
             {
                 Console.Write("ID e përdoruesit për përditësim: ");
-                int id = int.Parse(Console.ReadLine() ?? "0");
+                if (!int.TryParse(Console.ReadLine(), out int id))
+                {
+                    Console.WriteLine("ID jo valide.");
+                    return;
+                }
 
                 var existing = service.GjejSipasId(id);
 
@@ -136,7 +151,12 @@ namespace Punaflow.UI
                 existing.Email = Console.ReadLine();
 
                 Console.Write("Çmimi i ri: ");
-                existing.Price = decimal.Parse(Console.ReadLine() ?? "0");
+                if (!decimal.TryParse(Console.ReadLine(), out decimal price))
+                {
+                    Console.WriteLine("Çmimi jo valid.");
+                    return;
+                }
+                existing.Price = price;
 
                 Console.Write("Roli i ri: ");
                 existing.Role = Console.ReadLine();
@@ -152,17 +172,21 @@ namespace Punaflow.UI
 
         private void DeleteUser()
         {
-            Console.Write("ID e përdoruesit për fshirje: ");
-            int id;
-
-            if (int.TryParse(Console.ReadLine(), out id))
+            try
             {
+                Console.Write("ID e përdoruesit për fshirje: ");
+                if (!int.TryParse(Console.ReadLine(), out int id))
+                {
+                    Console.WriteLine("ID jo valide.");
+                    return;
+                }
+
                 service.Fshi(id);
                 Console.WriteLine("Përdoruesi u fshi me sukses.");
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("ID jo valide.");
+                Console.WriteLine("Gabim: " + ex.Message);
             }
         }
     }

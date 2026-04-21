@@ -10,9 +10,8 @@ namespace Punaflow
         static void Main(string[] args)
         {
             IRepository<User> repository = new FileRepository("Data/users.csv");
-            UserServices service = new UserServices(repository);
+            UserService service = new UserService(repository);
             Menu menu = new Menu(service);
-
             menu.Start();
         }
     }

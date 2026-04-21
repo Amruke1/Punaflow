@@ -28,18 +28,27 @@ namespace Punaflow.Data
 
             foreach (var line in lines)
             {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
                 var parts = line.Split(',');
 
-                if (parts.Length >= 5)
-                {
-                    users.Add(new User(
-                        int.Parse(parts[0]),
-                        parts[1],
-                        parts[2],
-                        decimal.Parse(parts[3], CultureInfo.InvariantCulture),
-                        parts[4]
-                    ));
-                }
+                if (parts.Length < 5)
+                    continue;
+
+                if (!int.TryParse(parts[0], out int id))
+                    continue;
+
+                if (!decimal.TryParse(parts[3], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal price))
+                    continue;
+
+                users.Add(new User(
+                    id,
+                    parts[1],
+                    parts[2],
+                    price,
+                    parts[4]
+                ));
             }
 
             return users;
@@ -85,8 +94,10 @@ namespace Punaflow.Data
 
         public void Save()
         {
-            var lines = new List<string>();
-            lines.Add("Id,Name,Email,Price,Role");
+            var lines = new List<string>
+            {
+                "Id,Name,Email,Price,Role"
+            };
 
             lines.AddRange(items.Select(x =>
                 string.Format("{0},{1},{2},{3},{4}",
