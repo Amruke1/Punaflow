@@ -1,9 +1,11 @@
 ﻿import { useEffect, useState } from 'react'
-import { Link, Routes, Route, useParams } from 'react-router-dom'
+import { Link, Routes, Route, useParams, useNavigate } from 'react-router-dom'
 import { supabase } from './supabaseClient'
 import './App.css'
 
 function App() {
+    const navigate = useNavigate()
+
     const [workers, setWorkers] = useState([])
     const [search, setSearch] = useState('')
     const [session, setSession] = useState(null)
@@ -12,16 +14,13 @@ function App() {
     const [authPassword, setAuthPassword] = useState('')
 
     const [form, setForm] = useState({
-        full_name: '',
+        first_name: '',
+        last_name: '',
         email: '',
+        phone: '',
         skill: '',
         location: '',
-        hourly_rate: '',
-        logo_url: '',
-        about: '',
-        portfolio_image_1: '',
-        portfolio_image_2: '',
-        portfolio_image_3: ''
+        hourly_rate: ''
     })
 
     useEffect(() => {
@@ -40,30 +39,22 @@ function App() {
         }
     }, [])
 
-    
     async function signUp() {
-        if (!authEmail || !authPassword) {
-            alert('Shkruaj email dhe password.')
-            return
+        try {
+            const { error } = await supabase.auth.signUp({
+                email: authEmail,
+                password: authPassword
+            })
+
+            if (error) {
+                alert(error.message)
+                return
+            }
+
+            alert('Signup successful!')
+        } catch (err) {
+            alert(err.message)
         }
-
-        if (authPassword.length < 6) {
-            alert('Password duhet të ketë së paku 6 karaktere.')
-            return
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-            email: authEmail,
-            password: authPassword
-        })
-
-        if (error) {
-            alert(error.message)
-            return
-        }
-
-        alert('Llogaria u krijua. Tani kliko Log in.')
-        console.log('Signup data:', data)
     }
 
     async function logIn() {
@@ -72,7 +63,9 @@ function App() {
             password: authPassword
         })
 
-        if (error) alert(error.message)
+        if (error) {
+            alert(error.message)
+        }
     }
 
     async function logOut() {
@@ -93,7 +86,7 @@ function App() {
         setWorkers(data || [])
     }
 
-    async function addWorker(e) {
+    async function addWorker(e, type = 'independent') {
         e.preventDefault()
 
         if (!session) {
@@ -101,21 +94,27 @@ function App() {
             return
         }
 
-        const { error } = await supabase.from('workers').insert([
-            {
-                user_id: session.user.id,
-                full_name: form.full_name,
-                email: form.email,
-                skill: form.skill,
-                location: form.location,
-                hourly_rate: Number(form.hourly_rate),
-                logo_url: form.logo_url,
-                about: form.about,
-                portfolio_image_1: form.portfolio_image_1,
-                portfolio_image_2: form.portfolio_image_2,
-                portfolio_image_3: form.portfolio_image_3
-            }
-        ])
+        const fullName = `${form.first_name} ${form.last_name}`.trim()
+
+        const { data, error } = await supabase
+            .from('workers')
+            .insert([
+                {
+                    user_id: session.user.id,
+                    profile_type: type,
+                    first_name: form.first_name,
+                    last_name: form.last_name,
+                    full_name: fullName,
+                    email: form.email,
+                    phone: form.phone,
+                    skill: form.skill,
+                    location: form.location,
+                    hourly_rate: Number(form.hourly_rate),
+                    profile_completed: false
+                }
+            ])
+            .select()
+            .single()
 
         if (error) {
             alert(error.message)
@@ -123,19 +122,22 @@ function App() {
         }
 
         setForm({
-            full_name: '',
+            first_name: '',
+            last_name: '',
             email: '',
+            phone: '',
             skill: '',
             location: '',
-            hourly_rate: '',
-            logo_url: '',
-            about: '',
-            portfolio_image_1: '',
-            portfolio_image_2: '',
-            portfolio_image_3: ''
+            hourly_rate: ''
         })
 
-        fetchWorkers()
+        await fetchWorkers()
+
+        if (type === 'independent') {
+            navigate(`/workers/${data.id}/edit`)
+        } else {
+            alert('Punëtori u shtua me sukses.')
+        }
     }
 
     async function deleteWorker(id) {
@@ -160,6 +162,7 @@ function App() {
 
     return (
         <div className="page">
+
             <nav className="navbar">
                 <Link to="/" className="logo">
                     <img src="/logo.png" alt="Punaflow Logo" className="navbarLogo" />
@@ -174,8 +177,9 @@ function App() {
             </nav>
 
             <main className="container">
+
                 <Routes>
-                    <Route path="/workers/:id" element={<WorkerProfile workers={workers} />} />
+
                     <Route
                         path="/"
                         element={
@@ -196,11 +200,21 @@ function App() {
                                 filteredWorkers={filteredWorkers}
                             />
                         }
-
                     />
+
                     <Route
                         path="/workers/:id"
                         element={<WorkerProfile workers={workers} />}
+                    />
+
+                    <Route
+                        path="/workers/:id/edit"
+                        element={
+                            <MiniWebsiteEditor
+                                workers={workers}
+                                fetchWorkers={fetchWorkers}
+                            />
+                        }
                     />
 
                     <Route
@@ -209,7 +223,6 @@ function App() {
                             <ProtectedProfilePage
                                 title="Punëtor i Pavarur"
                                 heading="Krijo Profilin"
-                                description="Krijo profilin dhe portfolio-n tënde."
                                 session={session}
                                 authEmail={authEmail}
                                 setAuthEmail={setAuthEmail}
@@ -222,7 +235,7 @@ function App() {
                                 <WorkerForm
                                     form={form}
                                     setForm={setForm}
-                                    addWorker={addWorker}
+                                    addWorker={(e) => addWorker(e, 'independent')}
                                     buttonText="Krijo Profil"
                                 />
                             </ProtectedProfilePage>
@@ -235,7 +248,6 @@ function App() {
                             <ProtectedProfilePage
                                 title="Biznes"
                                 heading="Paneli i Biznesit"
-                                description="Menaxho profilin dhe punëtorët."
                                 session={session}
                                 authEmail={authEmail}
                                 setAuthEmail={setAuthEmail}
@@ -246,10 +258,11 @@ function App() {
                                 logOut={logOut}
                                 variant="business"
                             >
+
                                 <WorkerForm
                                     form={form}
                                     setForm={setForm}
-                                    addWorker={addWorker}
+                                    addWorker={(e) => addWorker(e, 'business')}
                                     buttonText="Shto Punëtor"
                                 />
 
@@ -262,46 +275,15 @@ function App() {
                                     deleteWorker={deleteWorker}
                                     showDelete
                                 />
+
                             </ProtectedProfilePage>
                         }
                     />
+
                 </Routes>
+
             </main>
 
-            <footer className="footer">
-                <div className="footerTop">
-                    <img src="/logo.png" alt="Punaflow Logo" className="footerLogo" />
-
-                    <p>
-                        Punaflow lidh punëtorët, bizneset dhe klientët
-                        në një platformë moderne dhe të thjeshtë.
-                    </p>
-                </div>
-
-                <div className="footerLinks">
-                    <div>
-                        <h4>Platforma</h4>
-                        <a href="/">Ballina</a>
-                        <a href="/workers">Kërko Punëtorë</a>
-                    </div>
-
-                    <div>
-                        <h4>Llogaritë</h4>
-                        <a href="/independent">Punoj i Pavarur</a>
-                        <a href="/business">Kam Biznes</a>
-                    </div>
-
-                    <div>
-                        <h4>Kontakt</h4>
-                        <p>support@punaflow.com</p>
-                        <p>Kosovë</p>
-                    </div>
-                </div>
-
-                <div className="footerBottom">
-                    © 2026 Punaflow. All rights reserved.
-                </div>
-            </footer>
         </div>
     )
 }
@@ -311,9 +293,14 @@ function Home({ search, setSearch, filteredWorkers }) {
 
     return (
         <section className="homePage premiumHome">
+
             <div className="homeHeroNew">
+
                 <div className="heroLeft">
-                    <p className="heroBadge">Marketplace për shërbime</p>
+
+                    <p className="heroBadge">
+                        Marketplace për shërbime
+                    </p>
 
                     <h1>
                         Gjej njerëzit e duhur <br />
@@ -321,103 +308,54 @@ function Home({ search, setSearch, filteredWorkers }) {
                     </h1>
 
                     <p className="heroText">
-                        Punaflow lidh bizneset dhe klientët me profesionistë
-                        të verifikuar për punë cilësore dhe besueshmëri reale.
+                        Punaflow lidh bizneset dhe klientët me profesionistë të verifikuar.
                     </p>
 
                     <div className="heroSearch">
+
                         <input
-                            placeholder="Kërko elektricist, dizajner, pastruese..."
+                            placeholder="Kërko..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
+
                         <button>Kërko</button>
+
                     </div>
 
-                    <div className="popularTags">
-                        <span>Popullare:</span>
-                        <button>Elektricist</button>
-                        <button>Dizajner</button>
-                        <button>Hidraulik</button>
-                        <button>Pastrues</button>
-                        <button>Marangoz</button>
-                    </div>
                 </div>
 
-                <div className="heroVisual">
-                    <div className="mainWorkerCard">
-                        <img
-                            src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=600&q=80"
-                            alt=""
-                        />
-                    </div>
-
-                    <div className="smallPhoto top">
-                        <img
-                            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=80"
-                            alt=""
-                        />
-                    </div>
-
-                    <div className="smallPhoto bottom">
-                        <img
-                            src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=500&q=80"
-                            alt=""
-                        />
-                    </div>
-
-                    <div className="floatingStat">
-                        <strong>120+</strong>
-                        <span>Punëtorë aktivë</span>
-                    </div>
-
-                    <div className="verifiedBox">
-                        <strong>Të verifikuar</strong>
-                        <span>Profesionistë të besueshëm</span>
-                    </div>
-                </div>
             </div>
 
             <div className="recommendedHeader">
                 <h2>Profesionistë të rekomanduar</h2>
-                <a href="/workers">Shiko të gjithë →</a>
             </div>
 
             <div className="recommendedGrid">
+
                 {latestWorkers.map(worker => (
+
                     <div className="recommendedCard" key={worker.id}>
-                        {worker.logo_url && <img src={worker.logo_url} alt="" />}
+
+                        {worker.logo_url && (
+                            <img src={worker.logo_url} alt="" />
+                        )}
+
                         <div>
                             <h3>{worker.full_name}</h3>
                             <p>{worker.skill}</p>
-                            <span>⭐ 4.9</span>
-                            <small>{worker.location}</small>
+
+                            <Link to={`/workers/${worker.id}`}>
+                                Shiko profilin
+                            </Link>
                         </div>
+
                     </div>
+
                 ))}
+
             </div>
 
-            <div className="homeBenefits">
-                <div>
-                    ✅ <strong>Profesionistë të verifikuar</strong>
-                    <p>Të kontrolluar për cilësi.</p>
-                </div>
-
-                <div>
-                    ⭐ <strong>Vlerësime reale</strong>
-                    <p>Transparencë për çdo shërbim.</p>
-                </div>
-
-                <div>
-                    💬 <strong>Komunikim i lehtë</strong>
-                    <p>Lidhu direkt me profesionistin.</p>
-                </div>
-
-                <div>
-                    🔒 <strong>Pagesa e sigurt</strong>
-                    <p>Proces i thjeshtë dhe i mbrojtur.</p>
-                </div>
-            </div>
         </section>
     )
 }
@@ -425,6 +363,7 @@ function Home({ search, setSearch, filteredWorkers }) {
 function WorkersPage({ search, setSearch, filteredWorkers }) {
     return (
         <section className="workersSection">
+
             <div className="sectionHeader">
                 <p className="eyebrow">Kërko Punëtorë</p>
                 <h2>Gjej punëtorin e duhur</h2>
@@ -438,6 +377,7 @@ function WorkersPage({ search, setSearch, filteredWorkers }) {
             />
 
             <WorkerGrid workers={filteredWorkers} />
+
         </section>
     )
 }
@@ -445,7 +385,6 @@ function WorkersPage({ search, setSearch, filteredWorkers }) {
 function ProtectedProfilePage({
     title,
     heading,
-
     session,
     authEmail,
     setAuthEmail,
@@ -454,210 +393,173 @@ function ProtectedProfilePage({
     signUp,
     logIn,
     logOut,
-    variant,
     children
 }) {
+
     if (!session) {
-        if (variant === 'business') {
-            return (
-                <section className="businessAuthPage">
-                    <div className="businessIntro">
-                        <h1>
-                            Lidhe talentin <br />
-                            me mundësinë.
-                        </h1>
-
-                        <p>
-                            Punaflow është platforma që të lidh me profesionistë
-                            të besueshëm për çdo projekt.
-                        </p>
-
-                        <div className="businessFeatures">
-                            <div>
-                                <span>👥</span>
-                                <div>
-                                    <h3>Punëtorë të verifikuar</h3>
-                                    <p>Profesionistë të kontrolluar për cilësi dhe besueshmëri.</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span>🛡</span>
-                                <div>
-                                    <h3>Siguri dhe besim</h3>
-                                    <p>Të dhënat dhe profili i biznesit janë të sigurta.</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span>⚡</span>
-                                <div>
-                                    <h3>Gjej shpejt & lehtë</h3>
-                                    <p>Menaxho punëtorët dhe shërbimet në një vend.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="businessStats">
-                            <div>
-                                <h3>120+</h3>
-                                <p>Punëtorë aktivë</p>
-                            </div>
-
-                            <div>
-                                <h3>350+</h3>
-                                <p>Projekte të publikuara</p>
-                            </div>
-
-                            <div>
-                                <h3>4.9/5</h3>
-                                <p>Vlerësime mesatare</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="businessAuthCard">
-                        <p className="eyebrow">{title}</p>
-                        <h2>Kyçu ose krijo llogari</h2>
-
-                        <p className="authSubtitle">
-                            Menaxho profilin dhe punëtorët.
-                        </p>
-
-                        <div className="authInputWrap">
-                            <span>✉</span>
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                value={authEmail}
-                                onChange={(e) => setAuthEmail(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="authInputWrap">
-                            <span>🔒</span>
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                value={authPassword}
-                                onChange={(e) => setAuthPassword(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="authMeta">
-                            <label>
-                                <input type="checkbox" />
-                                Më mbaj të kyçur
-                            </label>
-
-                            <a href="#">Keni harruar fjalëkalimin?</a>
-                        </div>
-
-                        <div className="authActions">
-                            <button className="secondaryBtn" onClick={logIn}>
-                                Log in
-                            </button>
-
-                            <button onClick={signUp}>
-                                Sign up
-                            </button>
-                        </div>
-
-                        <p className="termsText">
-                            Duke vazhduar, ju pranoni Termat e Përdorimit dhe Politikat e Privatësisë.
-                        </p>
-                    </div>
-                </section>
-            )
-        }
-
         return (
             <section className="premiumAuthPage">
-                <div className="authCard">
-                    <p className="eyebrow">{title}</p>
-                    <h2>Kyçu ose krijo llogari</h2>
 
-                    <p className="authSubtitle">
-                        Kyçu në llogarinë tuaj ose krijo një të re për të vazhduar.
-                    </p>
+                <AuthCard
+                    title={title}
+                    authEmail={authEmail}
+                    setAuthEmail={setAuthEmail}
+                    authPassword={authPassword}
+                    setAuthPassword={setAuthPassword}
+                    signUp={signUp}
+                    logIn={logIn}
+                />
 
-                    <div className="authInputWrap">
-                        <span>✉</span>
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={authEmail}
-                            onChange={(e) => setAuthEmail(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="authInputWrap">
-                        <span>🔒</span>
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={authPassword}
-                            onChange={(e) => setAuthPassword(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="authMeta">
-                        <label>
-                            <input type="checkbox" />
-                            Më mbaj të kyçur
-                        </label>
-
-                        <a href="#">Keni harruar fjalëkalimin?</a>
-                    </div>
-
-                    <div className="authActions">
-                        <button onClick={signUp}>Sign up</button>
-                        <button className="secondaryBtn" onClick={logIn}>Log in</button>
-                    </div>
-
-                    <p className="termsText">
-                        Duke vazhduar, ju pranoni Termat e Përdorimit dhe Politikat e Privatësisë.
-                    </p>
-                </div>
             </section>
         )
     }
 
     return (
         <section className="adminSection">
+
             <div className="sectionHeader">
+
                 <p className="eyebrow">{title}</p>
+
                 <h2>{heading}</h2>
-                <p>Kyçur si: {session.user.email}</p>
-                <button onClick={logOut}>Log out</button>
+
+                <p>
+                    Kyçur si: {session.user.email}
+                </p>
+
+                <button onClick={logOut}>
+                    Log out
+                </button>
+
             </div>
 
             {children}
+
         </section>
+    )
+}
+
+function AuthCard({
+    title,
+    authEmail,
+    setAuthEmail,
+    authPassword,
+    setAuthPassword,
+    signUp,
+    logIn
+}) {
+    return (
+        <div className="authCard">
+
+            <p className="eyebrow">{title}</p>
+
+            <h2>Kyçu ose krijo llogari</h2>
+
+            <div className="authInputWrap">
+
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                />
+
+            </div>
+
+            <div className="authInputWrap">
+
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                />
+
+            </div>
+
+            <div className="authActions">
+
+                <button onClick={signUp}>
+                    Sign up
+                </button>
+
+                <button
+                    className="secondaryBtn"
+                    onClick={logIn}
+                >
+                    Log in
+                </button>
+
+            </div>
+
+        </div>
     )
 }
 
 function WorkerForm({ form, setForm, addWorker, buttonText }) {
     return (
-        <form onSubmit={addWorker}>
-            <input placeholder="Emri" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-            <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            <input placeholder="Aftësia" value={form.skill} onChange={(e) => setForm({ ...form, skill: e.target.value })} />
-            <input placeholder="Lokacioni" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-            <input placeholder="Pagesa për orë" value={form.hourly_rate} onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })} />
-            <input placeholder="Logo URL" value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} />
+        <form className="workerForm" onSubmit={addWorker}>
 
-            <textarea
-                placeholder="Përshkrimi"
-                value={form.about}
-                onChange={(e) => setForm({ ...form, about: e.target.value })}
+            <input
+                placeholder="First name"
+                value={form.first_name}
+                onChange={(e) =>
+                    setForm({ ...form, first_name: e.target.value })
+                }
             />
 
-            <input placeholder="Portfolio 1" value={form.portfolio_image_1} onChange={(e) => setForm({ ...form, portfolio_image_1: e.target.value })} />
-            <input placeholder="Portfolio 2" value={form.portfolio_image_2} onChange={(e) => setForm({ ...form, portfolio_image_2: e.target.value })} />
-            <input placeholder="Portfolio 3" value={form.portfolio_image_3} onChange={(e) => setForm({ ...form, portfolio_image_3: e.target.value })} />
+            <input
+                placeholder="Last name"
+                value={form.last_name}
+                onChange={(e) =>
+                    setForm({ ...form, last_name: e.target.value })
+                }
+            />
 
-            <button type="submit">{buttonText}</button>
+            <input
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) =>
+                    setForm({ ...form, email: e.target.value })
+                }
+            />
+
+            <input
+                placeholder="Phone number"
+                value={form.phone}
+                onChange={(e) =>
+                    setForm({ ...form, phone: e.target.value })
+                }
+            />
+
+            <input
+                placeholder="Profession"
+                value={form.skill}
+                onChange={(e) =>
+                    setForm({ ...form, skill: e.target.value })
+                }
+            />
+
+            <input
+                placeholder="Location"
+                value={form.location}
+                onChange={(e) =>
+                    setForm({ ...form, location: e.target.value })
+                }
+            />
+
+            <input
+                placeholder="Hourly rate"
+                value={form.hourly_rate}
+                onChange={(e) =>
+                    setForm({ ...form, hourly_rate: e.target.value })
+                }
+            />
+
+            <button type="submit">
+                {buttonText}
+            </button>
+
         </form>
     )
 }
@@ -665,72 +567,72 @@ function WorkerForm({ form, setForm, addWorker, buttonText }) {
 function WorkerGrid({ workers, deleteWorker, showDelete = false }) {
     return (
         <div className="grid">
+
             {workers.map(worker => (
+
                 <div className="workerCard" key={worker.id}>
-                    {worker.logo_url && (
-                        <img src={worker.logo_url} alt="" className="workerLogo" />
-                    )}
 
                     <h3>{worker.full_name}</h3>
+
                     <p>{worker.skill}</p>
+
                     <p>{worker.location}</p>
+
                     <p>{worker.hourly_rate} € / orë</p>
 
+                    <Link to={`/workers/${worker.id}`}>
+                        Shiko profilin
+                    </Link>
+
+                    <Link to={`/workers/${worker.id}/edit`}>
+                        Edito mini website
+                    </Link>
+
                     {showDelete && (
-                        <button className="deleteBtn" onClick={() => deleteWorker(worker.id)}>
+                        <button
+                            className="deleteBtn"
+                            onClick={() => deleteWorker(worker.id)}
+                        >
                             Fshije
                         </button>
                     )}
+
                 </div>
+
             ))}
+
         </div>
     )
 }
+
 function WorkerProfile({ workers }) {
 
     const { id } = useParams()
 
-    const worker = workers.find(
-        w => String(w.id) === id
-    )
+    const worker = workers.find(w => String(w.id) === id)
 
     if (!worker) {
-        return (
-            <section className="workersSection">
-                <h2>Profili nuk u gjet.</h2>
-            </section>
-        )
+        return <h2>Profili nuk u gjet.</h2>
     }
 
     return (
-
         <section className="profilePage">
 
             <div className="profileHeader">
 
-                {worker.logo_url && (
-                    <img
-                        src={worker.logo_url}
-                        alt=""
-                        className="profileImage"
-                    />
-                )}
-
                 <div>
 
                     <p className="eyebrow">
-                        Punaflow Portfolio Profile
+                        Punaflow Profile
                     </p>
 
-                    <h1>{worker.full_name}</h1>
+                    <h1>
+                        {worker.website_title || worker.full_name}
+                    </h1>
 
                     <p>
                         {worker.skill} · {worker.location}
                     </p>
-
-                    <span className="availableBadge">
-                        Available
-                    </span>
 
                 </div>
 
@@ -743,8 +645,7 @@ function WorkerProfile({ workers }) {
                     <h2>Rreth profilit</h2>
 
                     <p>
-                        {worker.about ||
-                            'Ky profil ende nuk ka përshkrim.'}
+                        {worker.about || 'Nuk ka përshkrim ende.'}
                     </p>
 
                 </div>
@@ -755,31 +656,164 @@ function WorkerProfile({ workers }) {
                         {worker.hourly_rate} € / orë
                     </h3>
 
-                    <button>
-                        Kontakto
-                    </button>
+                    <p>{worker.email}</p>
+
+                    <p>{worker.phone}</p>
+
+                    <Link
+                        to={`/workers/${worker.id}/edit`}
+                        className="editProfileBtn"
+                    >
+                        Edito mini website
+                    </Link>
 
                 </div>
-
-            </div>
-
-            <div className="profilePortfolio">
-
-                {worker.portfolio_image_1 && (
-                    <img src={worker.portfolio_image_1} alt="" />
-                )}
-
-                {worker.portfolio_image_2 && (
-                    <img src={worker.portfolio_image_2} alt="" />
-                )}
-
-                {worker.portfolio_image_3 && (
-                    <img src={worker.portfolio_image_3} alt="" />
-                )}
 
             </div>
 
         </section>
     )
 }
+
+function MiniWebsiteEditor({ workers, fetchWorkers }) {
+
+    const { id } = useParams()
+
+    const worker = workers.find(w => String(w.id) === id)
+
+    const [miniSite, setMiniSite] = useState({
+        logo_url: '',
+        cover_url: '',
+        website_title: '',
+        about: '',
+        service_description: '',
+        portfolio_image_1: '',
+        portfolio_image_2: '',
+        portfolio_image_3: ''
+    })
+
+    useEffect(() => {
+
+        if (worker) {
+            setMiniSite({
+                logo_url: worker.logo_url || '',
+                cover_url: worker.cover_url || '',
+                website_title: worker.website_title || '',
+                about: worker.about || '',
+                service_description: worker.service_description || '',
+                portfolio_image_1: worker.portfolio_image_1 || '',
+                portfolio_image_2: worker.portfolio_image_2 || '',
+                portfolio_image_3: worker.portfolio_image_3 || ''
+            })
+        }
+
+    }, [worker])
+
+    if (!worker) {
+        return <h2>Profili nuk u gjet.</h2>
+    }
+
+    async function saveMiniSite(e) {
+
+        e.preventDefault()
+
+        const { error } = await supabase
+            .from('workers')
+            .update({
+                ...miniSite,
+                profile_completed: true
+            })
+            .eq('id', worker.id)
+
+        if (error) {
+            alert(error.message)
+            return
+        }
+
+        alert('Mini website u ruajt.')
+        fetchWorkers()
+    }
+
+    return (
+        <section className="miniSiteEditor">
+
+            <div className="sectionHeader">
+
+                <p className="eyebrow">
+                    Mini Website
+                </p>
+
+                <h2>
+                    Edito profilin publik
+                </h2>
+
+            </div>
+
+            <form onSubmit={saveMiniSite}>
+
+                <input
+                    placeholder="Logo URL"
+                    value={miniSite.logo_url}
+                    onChange={(e) =>
+                        setMiniSite({
+                            ...miniSite,
+                            logo_url: e.target.value
+                        })
+                    }
+                />
+
+                <input
+                    placeholder="Cover image URL"
+                    value={miniSite.cover_url}
+                    onChange={(e) =>
+                        setMiniSite({
+                            ...miniSite,
+                            cover_url: e.target.value
+                        })
+                    }
+                />
+
+                <input
+                    placeholder="Website title"
+                    value={miniSite.website_title}
+                    onChange={(e) =>
+                        setMiniSite({
+                            ...miniSite,
+                            website_title: e.target.value
+                        })
+                    }
+                />
+
+                <textarea
+                    placeholder="About"
+                    value={miniSite.about}
+                    onChange={(e) =>
+                        setMiniSite({
+                            ...miniSite,
+                            about: e.target.value
+                        })
+                    }
+                />
+
+                <textarea
+                    placeholder="Services"
+                    value={miniSite.service_description}
+                    onChange={(e) =>
+                        setMiniSite({
+                            ...miniSite,
+                            service_description: e.target.value
+                        })
+                    }
+                />
+
+                <button type="submit">
+                    Ruaj mini website
+                </button>
+
+            </form>
+
+        </section>
+    )
+}
+
 export default App
