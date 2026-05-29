@@ -143,6 +143,12 @@ button {
     transition: 0.22s ease;
 }
 
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+    transform: none;
+}
+
     button:hover {
         transform: translateY(-2px);
         background: var(--navy);
@@ -289,6 +295,252 @@ button {
     margin-bottom: 18px;
 }
 
+.publicWorkersSection {
+    padding: 56px;
+    border-radius: 28px;
+}
+
+.publicWorkersHeader h2 {
+    font-size: 48px;
+    margin-bottom: 24px;
+}
+
+.publicSearchWrap {
+    position: relative;
+    margin-top: 10px;
+}
+
+.searchSuggestions {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    padding: 10px;
+    border-radius: 18px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 50px rgba(17, 24, 68, 0.14);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.searchSuggestionItem {
+    padding: 12px;
+    border-radius: 14px;
+    color: var(--navy);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.searchSuggestionItem:hover {
+    background: var(--offwhite);
+}
+
+.suggestionIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #0b57d0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-weight: 800;
+}
+
+.suggestionIcon.business {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.suggestionIcon.contest {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.searchSuggestionItem small {
+    display: block;
+    margin-top: 3px;
+    color: var(--steel);
+}
+
+.publicSearchWrap span {
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    z-index: 1;
+    transform: translateY(-50%);
+    color: var(--steel);
+    font-size: 38px;
+    line-height: 1;
+}
+
+.publicSearch {
+    height: 72px;
+    margin-top: 0;
+    padding-left: 72px;
+    border-radius: 20px;
+    font-size: 22px;
+    color: var(--navy);
+}
+
+.publicWorkerGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
+    margin-top: 34px;
+}
+
+.publicWorkerCard {
+    min-height: 260px;
+    padding: 38px;
+    border-radius: 24px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(17, 24, 68, 0.07);
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 34px;
+    align-items: center;
+    color: var(--navy);
+    text-decoration: none;
+    transition: 0.22s ease;
+}
+
+.publicWorkerCard:hover {
+    transform: translateY(-4px);
+    border-color: rgba(122, 170, 206, 0.46);
+    box-shadow: 0 28px 64px rgba(17, 24, 68, 0.12);
+}
+
+.publicWorkerAvatar {
+    width: 132px;
+    height: 132px;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #eff6ff, #ffffff);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.publicWorkerAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.publicWorkerAvatar span {
+    color: #0b57d0;
+    font-size: 54px;
+    font-weight: 800;
+}
+
+.publicWorkerBody h3 {
+    margin-bottom: 18px;
+    font-size: 28px;
+}
+
+.publicWorkerMeta {
+    margin: 10px 0;
+    color: var(--steel);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.metaIcon {
+    width: 24px;
+    color: var(--steel);
+    font-weight: 800;
+    text-align: center;
+}
+
+.publicWorkerDivider {
+    height: 1px;
+    margin: 34px 0 24px;
+    background: var(--border);
+}
+
+.publicWorkerFooter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 22px;
+}
+
+.workerServiceChip,
+.workerNameChip {
+    min-height: 52px;
+    padding: 0 18px;
+    border-radius: 14px;
+    color: var(--steel);
+    background: rgba(122, 170, 206, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.workerNameChip {
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.publicTrustBanner {
+    margin-top: 34px;
+    padding: 26px 30px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.95));
+    border: 1px solid rgba(122, 170, 206, 0.16);
+    box-shadow: 0 18px 45px rgba(17, 24, 68, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.trustIcon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    color: #0b57d0;
+    background: #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.publicTrustBanner strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 20px;
+}
+
+.publicTrustBanner p,
+.publicEmptyState p {
+    margin: 0;
+    color: var(--steel);
+}
+
+.publicEmptyState {
+    margin-top: 34px;
+    padding: 44px;
+    border-radius: 24px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
 .avatar,
 .miniAvatar {
     width: 54px;
@@ -324,6 +576,168 @@ button {
         border-radius: 14px;
     }
 
+.publicProfilePage {
+    display: flex;
+    flex-direction: column;
+}
+
+.publicCover {
+    height: 320px;
+    border-radius: 34px 34px 0 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--deep-blue), var(--soft-blue));
+}
+
+.publicCover img,
+.publicCoverFallback {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.publicProfileCard {
+    margin-top: -70px;
+    padding: 38px;
+    border-radius: 32px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.publicProfileHeader {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.publicAvatar {
+    width: 118px;
+    height: 118px;
+    flex: 0 0 auto;
+    border-radius: 30px;
+    overflow: hidden;
+    background: var(--deep-blue);
+    border: 6px solid white;
+    box-shadow: 0 18px 40px rgba(17, 24, 68, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.publicAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.publicAvatar span {
+    color: white;
+    font-size: 44px;
+    font-weight: 800;
+}
+
+.availableBadge {
+    display: inline-flex;
+    margin-top: 12px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: #166534;
+    background: rgba(34, 197, 94, 0.12);
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.publicProfileGrid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+    align-items: start;
+}
+
+.publicAbout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.publicAbout p {
+    color: var(--steel);
+    line-height: 1.7;
+}
+
+.publicContactCard {
+    padding: 26px;
+    border-radius: 24px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+}
+
+.publicContactCard p {
+    color: var(--steel);
+}
+
+.publicPortfolio {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.publicPortfolio img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 22px;
+    border: 1px solid var(--border);
+}
+
+.publicGallerySection {
+    margin-top: 34px;
+}
+
+.publicGalleryHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.publicGalleryHeader h2 {
+    margin-bottom: 0;
+}
+
+.publicGalleryHeader button {
+    background: white;
+    color: var(--deep-blue);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+
+.publicGalleryGrid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr;
+    gap: 16px;
+}
+
+.publicGalleryGrid.single {
+    grid-template-columns: 1fr;
+}
+
+.publicGalleryGrid img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 18px 40px rgba(17, 24, 68, 0.08);
+}
+
+.publicGalleryGrid img:first-child {
+    height: 340px;
+}
+
 /* FORMS */
 
 form {
@@ -357,6 +771,38 @@ textarea {
 
 form button {
     grid-column: span 2;
+}
+
+.imageUploadField {
+    min-height: 120px;
+    padding: 17px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--steel);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 15px;
+}
+
+.imageUploadField span {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+.imageUploadField input {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+}
+
+.uploadPreview {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid var(--border);
 }
 
 .deleteBtn {
@@ -440,6 +886,67 @@ form button {
         border-radius: 18px;
         font-size: 17px;
     }
+
+.authPopupOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    padding: 24px;
+    background: rgba(17, 24, 68, 0.28);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.authPopup {
+    width: min(520px, 100%);
+    padding: 28px;
+    border-radius: 24px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 32px 80px rgba(17, 24, 68, 0.24);
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.authPopupIcon {
+    width: 58px;
+    height: 58px;
+    border-radius: 999px;
+    color: #0b57d0;
+    background: #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-weight: 800;
+}
+
+.authPopup.error .authPopupIcon {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.authPopup.success .authPopupIcon {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.authPopup h3 {
+    margin-bottom: 8px;
+}
+
+.authPopup p {
+    color: var(--steel);
+    line-height: 1.6;
+}
+
+.authPopup button {
+    margin-top: 12px;
+    box-shadow: none;
+}
 
 .termsText {
     margin-top: 26px;
@@ -583,6 +1090,1185 @@ form button {
         color: var(--steel);
     }
 
+.businessDashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.businessHeroPanel {
+    padding: 54px 60px 46px;
+    border-radius: 32px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.businessHeroTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.businessSiteLink {
+    min-height: 52px;
+    padding: 0 22px;
+    border-radius: 14px;
+    color: white;
+    background: var(--navy);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    box-shadow: 0 14px 30px rgba(17, 24, 68, 0.16);
+}
+
+button.businessSiteLink {
+    font-size: 15px;
+}
+
+.secondaryBusinessSiteLink {
+    color: var(--navy);
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 24px rgba(17, 24, 68, 0.06);
+}
+
+.miniSiteLinkBox {
+    margin-top: 24px;
+    padding: 18px;
+    border-radius: 18px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.miniSiteLinkBox .eyebrow {
+    margin-bottom: 8px;
+}
+
+.miniSiteLinkBox strong {
+    display: block;
+    color: var(--deep-blue);
+    word-break: break-all;
+}
+
+.miniSiteLinkActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.miniSiteLinkActions a,
+.miniSiteLinkActions button {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.miniSiteLinkActions a {
+    color: white;
+    background: var(--navy);
+}
+
+.miniSiteLinkActions button {
+    box-shadow: none;
+}
+
+.businessHeroTop h1 {
+    font-size: 54px;
+    margin-bottom: 20px;
+}
+
+.businessGreeting {
+    color: var(--steel);
+    font-size: 20px;
+}
+
+.businessGreeting strong {
+    color: #0b57d0;
+}
+
+.businessEmail {
+    margin-top: 10px;
+    color: var(--steel);
+}
+
+.businessStatsGrid {
+    margin-top: 38px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px;
+}
+
+.businessStatCard {
+    min-height: 150px;
+    padding: 28px;
+    border-radius: 24px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 18px 44px rgba(17, 24, 68, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.businessStatIcon {
+    width: 68px;
+    height: 68px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.businessStatIcon.blue {
+    background: #dbeafe;
+}
+
+.businessStatIcon.green {
+    background: #dcfce7;
+}
+
+.businessStatIcon.yellow {
+    background: #fef3c7;
+}
+
+.businessStatIcon.purple {
+    background: #f3e8ff;
+}
+
+.businessStatCard h3 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.businessStatCard p {
+    margin-top: 8px;
+    color: var(--steel);
+}
+
+.businessGrid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.businessSitePanel {
+    padding: 36px;
+}
+
+.businessSiteForm {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.businessSiteForm input,
+.businessSiteForm textarea {
+    width: 100%;
+    padding: 17px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--navy);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+}
+
+.businessSiteForm .imageUploadField {
+    min-height: 150px;
+    margin: 0;
+}
+
+.businessSiteForm textarea {
+    grid-column: span 3;
+}
+
+.businessContestPanel {
+    padding: 36px;
+}
+
+.contestForm {
+    margin-top: 24px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.contestForm textarea {
+    grid-column: span 3;
+}
+
+.contestForm button {
+    grid-column: span 3;
+}
+
+.contestList {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+}
+
+.contestListItem {
+    padding: 18px;
+    border-radius: 18px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.contestListItem p {
+    color: var(--steel);
+    margin: 6px 0 0;
+}
+
+.contestListItem button {
+    padding: 10px 14px;
+    background: #b91c1c;
+}
+
+.businessMiniSite {
+    display: flex;
+    flex-direction: column;
+}
+
+.businessMiniCover {
+    height: 300px;
+    border-radius: 30px 30px 0 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--navy), var(--deep-blue));
+}
+
+.businessMiniCover img,
+.businessMiniCover div {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.businessMiniCard {
+    margin-top: -70px;
+    padding: 38px;
+    border-radius: 30px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.businessMiniHeader {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    margin-bottom: 34px;
+}
+
+.businessMiniLogo {
+    width: 120px;
+    height: 120px;
+    border-radius: 30px;
+    overflow: hidden;
+    background: #dbeafe;
+    border: 6px solid white;
+    box-shadow: 0 18px 40px rgba(17, 24, 68, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.businessMiniLogo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.businessMiniLogo span {
+    color: #0b57d0;
+    font-size: 48px;
+    font-weight: 800;
+}
+
+.businessMiniIntro {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+    align-items: start;
+}
+
+.businessMiniIntro p {
+    color: var(--steel);
+    line-height: 1.7;
+}
+
+.businessMiniIntro aside {
+    padding: 24px;
+    border-radius: 22px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+}
+
+.businessMiniWorkersHeader {
+    margin-top: 36px;
+}
+
+.businessMiniWorkers {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.businessMiniWorkerCard {
+    padding: 22px;
+    border-radius: 22px;
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--navy);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 16px 36px rgba(17, 24, 68, 0.06);
+}
+
+.businessMiniWorkerCard p,
+.businessMiniWorkerCard small {
+    display: block;
+    color: var(--steel);
+}
+
+.refinedBusinessGrid .dashboardPanel {
+    padding: 36px;
+    border-radius: 28px;
+}
+
+.panelTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.panelTitleRow h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.panelIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.blueIcon {
+    background: linear-gradient(135deg, #3b82f6, #0b57d0);
+}
+
+.greenIcon {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.businessAddPanel .workerForm {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.businessAddPanel .workerForm button {
+    background: #125bea;
+}
+
+.businessWorkerList {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.businessWorkerItem {
+    padding: 26px;
+    border-radius: 26px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 0 16px 40px rgba(17, 24, 68, 0.06);
+    display: grid;
+    grid-template-columns: 92px 1fr auto;
+    align-items: center;
+    gap: 24px;
+}
+
+.businessWorkerAvatar {
+    width: 82px;
+    height: 82px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: white;
+}
+
+.fallbackAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b57d0;
+    background: #eff6ff;
+    font-size: 34px;
+    font-weight: 800;
+}
+
+.businessWorkerInfo h3 {
+    margin: 0 0 8px;
+    font-size: 22px;
+}
+
+.businessWorkerInfo p,
+.businessWorkerInfo small,
+.businessWorkerInfo strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--steel);
+}
+
+.businessWorkerLinks {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.businessWorkerLinks a {
+    color: #0b57d0;
+    font-weight: 700;
+}
+
+.compactDeleteBtn {
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: 14px;
+}
+
+.emptyText {
+    color: var(--steel);
+}
+
+.payrollPanel {
+    overflow: hidden;
+    padding: 42px;
+    border-radius: 28px;
+}
+
+.payrollHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.payrollHeader p {
+    color: var(--steel);
+    line-height: 1.6;
+}
+
+.addPayrollBtn {
+    background: var(--navy);
+    white-space: nowrap;
+}
+
+.payrollTable {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.payrollRow {
+    min-width: 1120px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 120px 100px 130px 190px 110px 110px;
+    gap: 12px;
+    align-items: center;
+    padding: 20px;
+    border-radius: 0;
+    background: white;
+    border: 1px solid var(--border);
+}
+
+.payrollHead {
+    background: #eef4ff;
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-radius: 18px 18px 0 0;
+}
+
+.payrollRow:last-child {
+    border-radius: 0 0 18px 18px;
+}
+
+.payrollWorkerCell {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.payrollWorkerCell .businessWorkerAvatar {
+    width: 58px;
+    height: 58px;
+}
+
+.payrollRow strong,
+.payrollRow small {
+    display: block;
+}
+
+.payrollRow small {
+    margin-top: 4px;
+    color: var(--steel);
+}
+
+.payrollRow input,
+.payrollRow select {
+    width: 100%;
+    padding: 12px 13px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--navy);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.payrollRow input:disabled {
+    background: #eef1f3;
+    color: var(--steel);
+}
+
+.payrollLinks {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.stackedLinks {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.payrollLinks a {
+    padding: 8px 11px;
+    border-radius: 999px;
+    color: var(--deep-blue);
+    background: rgba(122, 170, 206, 0.14);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.overtimeInputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.miniDashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.dashboardHero,
+.dashboardPanel {
+    padding: 34px;
+    border-radius: 30px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.dashboardHero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.dashboardHero p {
+    color: var(--steel);
+}
+
+.miniWebsiteHero {
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 28px;
+    border-radius: 18px;
+}
+
+.miniHeroTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 28px;
+}
+
+.miniHeroIdentity {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.miniHeroAvatar {
+    width: 92px;
+    height: 92px;
+    border-radius: 999px;
+    overflow: hidden;
+    flex: 0 0 auto;
+    background: linear-gradient(145deg, #dcfce7, #f0fdf4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.miniHeroAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.miniHeroAvatar span {
+    color: #064e3b;
+    font-size: 42px;
+    font-weight: 800;
+}
+
+.miniHeroIdentity h1 {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.miniHeroActions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.editProfileBtn {
+    min-height: 52px;
+    padding: 0 22px;
+    border-radius: 12px;
+    color: #5b21b6;
+    background: white;
+    border: 1px solid rgba(91, 33, 182, 0.22);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    box-shadow: 0 12px 24px rgba(17, 24, 68, 0.04);
+}
+
+.miniLogoutBtn {
+    min-height: 52px;
+    padding: 0 22px;
+    border-radius: 12px;
+    background: var(--navy);
+    box-shadow: 0 12px 26px rgba(17, 24, 68, 0.18);
+}
+
+.dashboardStats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+}
+
+.miniHeroStats {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.miniHeroStats .statCard {
+    min-height: 126px;
+    padding: 24px 30px;
+    border-radius: 0;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-right: 1px solid var(--border);
+}
+
+.miniHeroStats .statCard:last-child {
+    border-right: none;
+}
+
+.dashboardStatIcon {
+    width: 62px;
+    height: 62px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.dashboardStatIcon.blue {
+    color: #0b57d0;
+    background: #dbeafe;
+}
+
+.dashboardStatIcon.green {
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.dashboardStatIcon.purple {
+    color: #7e22ce;
+    background: #f3e8ff;
+}
+
+.dashboardStatIcon.yellow {
+    color: #ca8a04;
+    background: #fef3c7;
+}
+
+.dashboardTwoColumn {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+.clientWorkspace {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.miniMainGrid {
+    grid-template-columns: 0.78fr 1.86fr;
+}
+
+.miniMainGrid .dashboardPanel {
+    min-height: 100%;
+    border-radius: 18px;
+}
+
+.miniMainGrid .plannerPanel {
+    padding: 28px;
+}
+
+.clientFormPanel,
+.clientListPanel {
+    min-height: 100%;
+}
+
+.clientFormPanel .compactForm {
+    margin-top: 22px;
+}
+
+.clientListPanel .dashboardList {
+    max-height: none;
+    padding-right: 4px;
+}
+
+.clientHistoryPanel {
+    border-radius: 18px;
+}
+
+.clientHistoryPanel .dashboardList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+}
+
+.privateGalleryPanel {
+    padding: 34px;
+}
+
+.privateGalleryHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 22px;
+}
+
+.privateGalleryHeader p {
+    color: var(--steel);
+    line-height: 1.6;
+}
+
+.galleryUploadButton {
+    position: relative;
+    overflow: hidden;
+    min-width: 150px;
+    padding: 14px 20px;
+    border-radius: 16px;
+    background: var(--navy);
+    color: white;
+    box-shadow: 0 14px 30px rgba(17, 24, 68, 0.18);
+    font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+}
+
+.galleryUploadButton input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.privateGalleryGrid {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.privateGalleryItem {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    background: var(--offwhite);
+}
+
+.privateGalleryItem img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    display: block;
+}
+
+.privateGalleryItem button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #b91c1c;
+    box-shadow: none;
+}
+
+.compactForm {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.compactForm button {
+    grid-column: span 2;
+}
+
+.fieldLabel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--steel);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.fieldLabel input {
+    width: 100%;
+}
+
+.dashboardList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.dashboardListItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, white, rgba(247, 248, 240, 0.74));
+    border: 1px solid var(--border);
+}
+
+.dashboardListItem p,
+.dashboardListItem small {
+    display: block;
+    margin-top: 5px;
+    color: var(--steel);
+}
+
+.dashboardListItem button {
+    padding: 10px 14px;
+    background: #b91c1c;
+}
+
+.publicAvailability {
+    margin-top: 34px;
+    padding: 30px;
+    border-radius: 28px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+}
+
+.publicPlannerGrid {
+    gap: 8px;
+}
+
+.publicPlannerDay {
+    min-height: 86px;
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.publicPlannerDay.busy {
+    background: rgba(185, 28, 28, 0.08);
+}
+
+.dateControl {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.dateControl input {
+    padding: 17px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    font-size: 15px;
+    outline: none;
+    font-family: 'Poppins', Inter, Arial, sans-serif;
+    background: white;
+}
+
+.dateTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.dateTags button {
+    padding: 10px 14px;
+    color: var(--navy);
+    background: rgba(122, 170, 206, 0.18);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+
+.dateTags.busy button {
+    color: #7f1d1d;
+    background: rgba(185, 28, 28, 0.10);
+}
+
+.plannerPanel {
+    overflow: hidden;
+}
+
+.miniMainGrid .plannerPanel .plannerDateLists {
+    display: none;
+}
+
+.plannerHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.plannerHeader p {
+    color: var(--steel);
+    margin-top: 6px;
+}
+
+.plannerLegend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.plannerLegend span {
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.freeDot {
+    color: #166534;
+    background: rgba(34, 197, 94, 0.12);
+}
+
+.busyDot {
+    color: #7f1d1d;
+    background: rgba(185, 28, 28, 0.10);
+}
+
+.jobDot {
+    color: var(--deep-blue);
+    background: rgba(122, 170, 206, 0.18);
+}
+
+.plannerControls {
+    grid-template-columns: 1fr auto 1fr auto;
+}
+
+.calendarToolbar {
+    margin-top: 24px;
+    padding: 14px;
+    border-radius: 22px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.calendarToolbar strong {
+    color: var(--navy);
+    font-size: 22px;
+    text-transform: capitalize;
+}
+
+.calendarToolbar button {
+    box-shadow: none;
+    padding: 11px 16px;
+    min-width: 46px;
+}
+
+.plannerGrid {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.plannerWeekday {
+    padding: 0 4px 6px;
+    color: var(--steel);
+    font-size: 13px;
+    text-align: center;
+}
+
+.plannerDay {
+    min-height: 70px;
+    padding: 10px;
+    border-radius: 12px;
+    background: var(--offwhite);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.plannerDay span {
+    color: var(--navy);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.plannerDay small {
+    color: var(--steel);
+}
+
+.plannerDay em {
+    margin-top: 3px;
+    padding: 5px 7px;
+    border-radius: 8px;
+    color: white;
+    background: var(--deep-blue);
+    font-size: 12px;
+    font-style: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.plannerDay.free {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.18);
+}
+
+.plannerDay.busy {
+    background: rgba(185, 28, 28, 0.08);
+    border-color: rgba(185, 28, 28, 0.20);
+}
+
+.plannerDay.outsideMonth {
+    opacity: 0.38;
+}
+
+.plannerDay button {
+    margin-top: auto;
+    padding: 7px 9px;
+    border-radius: 10px;
+    box-shadow: none;
+    font-size: 12px;
+}
+
+.plannerDay.free button {
+    background: #166534;
+}
+
+.plannerDay.busy button {
+    background: #b91c1c;
+}
+
+.plannerDateLists {
+    margin-top: 26px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+.plannerDateLists h3 {
+    font-size: 18px;
+}
+
+.dateTags span {
+    padding: 10px 14px;
+    border-radius: 999px;
+    color: var(--navy);
+    background: rgba(122, 170, 206, 0.14);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.dateTags.busy span {
+    color: #7f1d1d;
+    background: rgba(185, 28, 28, 0.10);
+}
+
 /* FOOTER */
 
 .footer {
@@ -682,13 +2368,69 @@ form button {
 
     form,
     .trustRow,
-    .statsGrid {
+    .statsGrid,
+    .dashboardTwoColumn,
+    .clientWorkspace,
+    .businessGrid,
+    .compactForm,
+    .dateControl,
+    .plannerControls,
+    .plannerDateLists,
+    .publicProfileGrid,
+    .publicPortfolio {
         grid-template-columns: 1fr;
     }
 
-        form button {
+    .publicGalleryGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .publicGalleryGrid img,
+    .publicGalleryGrid img:first-child {
+        height: 220px;
+    }
+
+        form button,
+        .compactForm button {
             grid-column: span 1;
         }
+
+    .dashboardHero,
+    .dashboardListItem,
+    .publicProfileHeader,
+    .plannerHeader,
+    .privateGalleryHeader,
+    .publicGalleryHeader,
+    .miniSiteLinkBox {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .publicCover {
+        height: 220px;
+    }
+
+    .publicProfileCard {
+        padding: 26px;
+    }
+
+    .plannerGrid {
+        gap: 6px;
+    }
+
+    .plannerDay {
+        min-height: 86px;
+        padding: 8px;
+    }
+
+    .plannerDay span {
+        font-size: 18px;
+    }
+
+    .plannerDay em,
+    .plannerDay button {
+        display: none;
+    }
 }
 .businessAuthPage {
     min-height: calc(100vh - 140px);
@@ -844,11 +2586,11 @@ form button {
     }
 }
 .premiumHome {
-    gap: 70px;
+    gap: 34px;
 }
 
 .homeHeroNew {
-    min-height: 650px;
+    min-height: 520px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
@@ -875,6 +2617,7 @@ form button {
 
 .heroSearch {
     margin-top: 32px;
+    position: relative;
     display: flex;
     max-width: 680px;
     background: white;
@@ -919,7 +2662,7 @@ form button {
 
 .heroVisual {
     position: relative;
-    height: 560px;
+    height: 500px;
 }
 
 .mainWorkerCard {
@@ -995,6 +2738,7 @@ form button {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 6px;
 }
 
     .recommendedHeader a {
@@ -1007,6 +2751,7 @@ form button {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 24px;
+    margin-top: 12px;
 }
 
 .recommendedCard {
@@ -1037,6 +2782,65 @@ form button {
         display: block;
     }
 
+.homeContests {
+    padding: 34px;
+    border-radius: 28px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.contestGrid {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.contestCard,
+.contestEmpty {
+    min-height: 250px;
+    padding: 26px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, white, rgba(247, 248, 240, 0.7));
+    border: 1px solid var(--border);
+    box-shadow: 0 16px 36px rgba(17, 24, 68, 0.06);
+}
+
+.contestCard span {
+    color: var(--deep-blue);
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contestCard h3 {
+    margin-top: 14px;
+}
+
+.contestCard p,
+.contestEmpty p {
+    color: var(--steel);
+    line-height: 1.6;
+}
+
+.contestCard div {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contestCard small {
+    color: var(--steel);
+}
+
+.contestCard a {
+    color: #0b57d0;
+    font-weight: 800;
+}
+
 .homeBenefits {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1063,11 +2867,61 @@ form button {
     }
 
     .recommendedGrid,
+    .contestGrid,
     .homeBenefits {
         grid-template-columns: 1fr;
     }
 
     .heroLeft h1 {
         font-size: 46px;
+    }
+}
+
+@media (max-width: 950px) {
+    .publicWorkersSection {
+        padding: 34px;
+    }
+
+    .publicWorkersHeader h2 {
+        font-size: 38px;
+    }
+
+    .publicWorkerGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .publicWorkerCard {
+        grid-template-columns: 112px 1fr;
+        gap: 22px;
+        padding: 26px;
+        min-height: auto;
+    }
+
+    .publicWorkerAvatar {
+        width: 104px;
+        height: 104px;
+    }
+
+    .publicWorkerBody h3 {
+        font-size: 24px;
+    }
+
+    .publicWorkerMeta {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 620px) {
+    .publicWorkerCard {
+        grid-template-columns: 1fr;
+    }
+
+    .publicSearch {
+        font-size: 18px;
+    }
+
+    .publicTrustBanner {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
