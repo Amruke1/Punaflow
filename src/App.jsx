@@ -222,11 +222,7 @@ function App() {
         setContests(getAllBusinessContests())
     }, [])
 
-    const filteredWorkers = workers.filter(worker =>
-        worker.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        worker.skill?.toLowerCase().includes(search.toLowerCase()) ||
-        worker.location?.toLowerCase().includes(search.toLowerCase())
-    )
+    const filteredWorkers = workers.filter(worker => matchesWorkerSearch(worker, search))
     const independentWorker = session
         ? workers.find(worker => worker.user_id === session.user.id)
         : null
@@ -349,6 +345,7 @@ function App() {
                                     addWorker={(e) => addWorker(e, false)}
                                     deleteWorker={deleteWorker}
                                     session={session}
+                                    logOut={logOut}
                                     onContestsChange={refreshContests}
                                     showAuthPopup={showAuthPopup}
                                 />
@@ -427,17 +424,17 @@ function Home({ search, setSearch, filteredWorkers, allWorkers, contests }) {
 
                     <div className="heroSearch">
                         <input
-                            placeholder="Kërko elektricist, dizajner, pastruese..."
+                            placeholder="Kërko profesion, emër ose qytet..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                         <button onClick={goToSearch}>Kërko</button>
-                        <SearchSuggestions suggestions={suggestions} />
+                        <SearchSuggestions suggestions={suggestions} onPick={(value) => setSearch(value)} />
                     </div>
 
                     <div className="popularTags">
                         <span>Më të kërkuarat:</span>
-                        {['Elektricist', 'Dizajner', 'Hidraulik', 'Pastrues', 'Marangoz'].map(tag => (
+                        {['Elektricist', 'Dizajner', 'Mitrovicë', 'Prishtinë', 'Prizren'].map(tag => (
                             <button type="button" onClick={() => setSearch(tag)} key={tag}>{tag}</button>
                         ))}
                     </div>
@@ -559,23 +556,46 @@ function Home({ search, setSearch, filteredWorkers, allWorkers, contests }) {
 
 function WorkersPage({ search, setSearch, filteredWorkers, allWorkers }) {
     const latestWorkers = filteredWorkers.slice(0, 8)
+    const searchTags = ['Elektricist', 'Hidraulik', 'Pastrues', 'Dizajner', 'Mitrovicë', 'Prishtinë', 'Prizren']
 
     return (
         <section className="workersSection publicWorkersSection">
             <div className="sectionHeader publicWorkersHeader">
                 <p className="eyebrow">Kërko Punëtorë</p>
                 <h2>Gjej punëtorin e duhur</h2>
+                <p>Kërko sipas profesionit, emrit ose qytetit ku të duhet shërbimi.</p>
             </div>
 
             <div className="publicSearchWrap">
                 <span>S</span>
                 <input
                     className="search publicSearch"
-                    placeholder="Kërko..."
+                    placeholder="Kërko profesion, emër ose qytet..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
-                <SearchSuggestions suggestions={buildSearchSuggestions(search, filteredWorkers, allWorkers)} />
+                {search && (
+                    <button type="button" className="clearSearchBtn" onClick={() => setSearch('')}>
+                        Pastro
+                    </button>
+                )}
+                <SearchSuggestions
+                    suggestions={buildSearchSuggestions(search, filteredWorkers, allWorkers)}
+                    onPick={(value) => setSearch(value)}
+                />
+            </div>
+
+            <div className="workerSearchTags">
+                {searchTags.map(tag => (
+                    <button type="button" onClick={() => setSearch(tag)} key={tag}>
+                        {tag}
+                    </button>
+                ))}
+            </div>
+
+            <div className="publicResultsMeta">
+                <strong>{latestWorkers.length}</strong>
+                <span>{search ? `rezultate për "${search}"` : 'punëtorët e fundit'}</span>
             </div>
 
             <PublicWorkerGrid workers={latestWorkers} allWorkers={allWorkers} />
@@ -641,7 +661,7 @@ function PublicWorkerGrid({ workers, allWorkers }) {
     )
 }
 
-function SearchSuggestions({ suggestions }) {
+function SearchSuggestions({ suggestions, onPick }) {
     if (!suggestions.length) {
         return null
     }
@@ -649,7 +669,12 @@ function SearchSuggestions({ suggestions }) {
     return (
         <div className="searchSuggestions">
             {suggestions.map(suggestion => (
-                <Link to={suggestion.to} className="searchSuggestionItem" key={`${suggestion.type}-${suggestion.id}`}>
+                <Link
+                    to={suggestion.to}
+                    className="searchSuggestionItem"
+                    key={`${suggestion.type}-${suggestion.id}`}
+                    onClick={() => onPick?.(suggestion.searchValue || suggestion.title)}
+                >
                     <span className={`suggestionIcon ${suggestion.type}`}>{suggestion.icon}</span>
                     <div>
                         <strong>{suggestion.title}</strong>
@@ -667,6 +692,19 @@ function buildSearchSuggestions(search, workers, allWorkers, contests = []) {
     if (query.length < 2) {
         return []
     }
+
+    const citySuggestions = [...new Set(workers.map(worker => worker.location).filter(Boolean))]
+        .filter(city => normalizeSearchText(city).includes(normalizeSearchText(query)))
+        .slice(0, 3)
+        .map(city => ({
+            id: city,
+            type: 'city',
+            icon: 'Q',
+            title: city,
+            subtitle: 'Qytet / lokacion',
+            searchValue: city,
+            to: '/workers'
+        }))
 
     const workerSuggestions = workers
         .slice(0, 4)
@@ -695,7 +733,33 @@ function buildSearchSuggestions(search, workers, allWorkers, contests = []) {
             to: contest.ownerId ? `/businesses/${contest.ownerId}` : '/workers'
         }))
 
-    return [...workerSuggestions, ...contestSuggestions].slice(0, 6)
+    return [...citySuggestions, ...workerSuggestions, ...contestSuggestions].slice(0, 6)
+}
+
+function matchesWorkerSearch(worker, search) {
+    const query = normalizeSearchText(search)
+
+    if (!query) {
+        return true
+    }
+
+    return [
+        worker.full_name,
+        worker.first_name,
+        worker.last_name,
+        worker.skill,
+        worker.location,
+        worker.city,
+        worker.email
+    ].some(value => normalizeSearchText(value).includes(query))
+}
+
+function normalizeSearchText(value = '') {
+    return String(value)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
 }
 
 function getPublicWorkerLink(worker, workers) {
@@ -943,6 +1007,10 @@ function ProtectedProfilePage({
         return <WrongAccountRedirect logOut={logOut} />
     }
 
+    if (variant === 'business') {
+        return children
+    }
+
     return (
         <section className="adminSection">
             <div className="sectionHeader">
@@ -1046,7 +1114,7 @@ function AuthPopup({ popup, onClose }) {
     )
 }
 
-function BusinessDashboard({ form, setForm, workers, addWorker, deleteWorker, session, onContestsChange, showAuthPopup }) {
+function BusinessDashboard({ form, setForm, workers, addWorker, deleteWorker, session, logOut, onContestsChange, showAuthPopup }) {
     const navigate = useNavigate()
     const businessMiniSitePath = `/businesses/${session?.user?.id}`
     const payrollKey = `punaflow-business-payroll-${session?.user?.id || 'local'}`
@@ -1063,10 +1131,14 @@ function BusinessDashboard({ form, setForm, workers, addWorker, deleteWorker, se
         location: '',
         salary: ''
     })
-    const [businessSite, setBusinessSite] = useState(() => ({
-        ...loadBusinessSite(businessSiteKey),
-        email: loadBusinessSite(businessSiteKey).email || session?.user?.email || ''
-    }))
+    const [businessSite, setBusinessSite] = useState(() => {
+        const savedSite = loadBusinessSite(businessSiteKey)
+
+        return {
+            ...savedSite,
+            email: savedSite.email || session?.user?.email || ''
+        }
+    })
 
     useEffect(() => {
         const saved = localStorage.getItem(payrollKey)
@@ -1158,25 +1230,28 @@ function BusinessDashboard({ form, setForm, workers, addWorker, deleteWorker, se
         setContests(prev => prev.filter(contest => contest.id !== contestId))
     }
 
-    function handleBusinessImageUpload(field, file) {
+    async function handleBusinessImageUpload(field, file) {
         if (!file) {
             return
         }
 
-        const reader = new FileReader()
+        const imageData = await readFileAsDataUrl(file)
 
-        reader.onload = () => {
-            setBusinessSite(prev => ({
-                ...prev,
-                [field]: reader.result
-            }))
-        }
-
-        reader.readAsDataURL(file)
+        setBusinessSite(prev => ({
+            ...prev,
+            [field]: imageData
+        }))
     }
 
     function publishBusinessSite() {
-        localStorage.setItem(businessSiteKey, JSON.stringify(businessSite))
+        const siteToPublish = {
+            ...businessSite,
+            name: businessSite.name || displayName,
+            email: businessSite.email || session?.user?.email || ''
+        }
+
+        localStorage.setItem(businessSiteKey, JSON.stringify(siteToPublish))
+        setBusinessSite(siteToPublish)
         showAuthPopup?.(
             'success',
             'Mini site u publikua',
@@ -1186,250 +1261,289 @@ function BusinessDashboard({ form, setForm, workers, addWorker, deleteWorker, se
     }
 
     return (
-        <section className="businessDashboard">
-            <div className="businessHeroPanel">
-                <div className="businessHeroTop">
-                    <div>
-                        <p className="eyebrow">Biznes</p>
-                        <h1>Paneli i Biznesit</h1>
-                        <p className="businessGreeting">Përshëndetje, <strong>{displayName}</strong></p>
-                        <p className="businessEmail">kyçur si: {session?.user?.email}</p>
+        <section className="businessDashboardShell">
+            <aside className="businessSidebar">
+                <div>
+                    <div className="businessBrand">
+                        <span>B</span>
+                        <strong>Biznes</strong>
                     </div>
-                    <button type="button" className="businessSiteLink" onClick={publishBusinessSite}>
-                        Publiko mini site
-                    </button>
+
+                    <nav className="businessSideNav">
+                        <a href="#panel" className="active">▦ Paneli</a>
+                        <a href="#mini-site">▣ Mini site</a>
+                        <a href="#konkurs">☆ Konkurs</a>
+                        <a href="#punetoret">♙ Punëtorët</a>
+                        <a href="#payroll">▤ Payroll</a>
+                        <a href="#raportet">▥ Raportet</a>
+                        <a href="#cilesimet">⚙ Cilësimet</a>
+                    </nav>
                 </div>
 
-                <div className="businessStatsGrid">
-                    <BusinessStat icon="P" tone="blue" value={workers.length} label="Punëtorë në sistem" />
-                    <BusinessStat icon="H" tone="green" value={totalHours} label="Orë normale" />
-                    <BusinessStat icon="OT" tone="yellow" value={totalOvertime} label="Orë overtime" />
-                    <BusinessStat icon="€" tone="purple" value={`${totalPayroll.toFixed(2)} €`} label="Paga totale" />
-                </div>
-            </div>
-
-            <section className="dashboardPanel businessSitePanel">
-                <div className="payrollHeader">
-                    <div>
-                        <p className="eyebrow">Mini site biznesi</p>
-                        <h2>Faqja publike e biznesit</h2>
-                        <p>Kjo faqe hapet kur klienti kërkon një shërbim dhe rezultati është nga biznesi yt.</p>
-                    </div>
-                    <button type="button" className="businessSiteLink secondaryBusinessSiteLink" onClick={publishBusinessSite}>
-                        Publiko mini site
-                    </button>
-                </div>
-
-                <div className="businessSiteForm">
-                    <input
-                        placeholder="Emri i biznesit"
-                        value={businessSite.name}
-                        onChange={(e) => setBusinessSite({ ...businessSite, name: e.target.value })}
-                    />
-                    <ImageUploadField
-                        label="Logo e biznesit"
-                        value={businessSite.logo_url}
-                        onChange={(file) => handleBusinessImageUpload('logo_url', file)}
-                    />
-                    <ImageUploadField
-                        label="Cover i biznesit"
-                        value={businessSite.cover_url}
-                        onChange={(file) => handleBusinessImageUpload('cover_url', file)}
-                    />
-                    <input
-                        placeholder="Telefon"
-                        value={businessSite.phone}
-                        onChange={(e) => setBusinessSite({ ...businessSite, phone: e.target.value })}
-                    />
-                    <input
-                        placeholder="Email"
-                        value={businessSite.email}
-                        onChange={(e) => setBusinessSite({ ...businessSite, email: e.target.value })}
-                    />
-                    <textarea
-                        placeholder="Përshkrimi i biznesit"
-                        value={businessSite.about}
-                        onChange={(e) => setBusinessSite({ ...businessSite, about: e.target.value })}
-                    />
-                </div>
-
-                <MiniSiteLinkBox
-                    title="Linku i mini-site të biznesit"
-                    path={businessMiniSitePath}
-                    onCopy={() => showAuthPopup?.('success', 'Linku u kopjua', 'Linku i mini-site u kopjua në clipboard.')}
-                />
-            </section>
-
-            <section className="dashboardPanel businessContestPanel">
-                <div className="payrollHeader">
-                    <div>
-                        <p className="eyebrow">Konkurse</p>
-                        <h2>Publiko konkurs</h2>
-                        <p>Konkurset që shton këtu shfaqen në homepage për kandidatët.</p>
-                    </div>
-                </div>
-
-                <form className="contestForm" onSubmit={addContest}>
-                    <input
-                        placeholder="Titulli i konkursit"
-                        value={contestForm.title}
-                        onChange={(e) => setContestForm({ ...contestForm, title: e.target.value })}
-                    />
-                    <input
-                        placeholder="Lokacioni"
-                        value={contestForm.location}
-                        onChange={(e) => setContestForm({ ...contestForm, location: e.target.value })}
-                    />
-                    <input
-                        placeholder="Paga / pagesa"
-                        value={contestForm.salary}
-                        onChange={(e) => setContestForm({ ...contestForm, salary: e.target.value })}
-                    />
-                    <textarea
-                        placeholder="Përshkrimi i konkursit"
-                        value={contestForm.description}
-                        onChange={(e) => setContestForm({ ...contestForm, description: e.target.value })}
-                    />
-                    <button type="submit">Publiko konkurs</button>
-                </form>
-
-                <div className="contestList">
-                    {contests.map(contest => (
-                        <div className="contestListItem" key={contest.id}>
-                            <div>
-                                <strong>{contest.title}</strong>
-                                <p>{contest.location || 'Lokacion fleksibil'} · {contest.salary || 'Pagesa sipas marrëveshjes'}</p>
-                            </div>
-                            <button type="button" onClick={() => deleteContest(contest.id)}>Fshije</button>
+                <div className="businessSidebarBottom">
+                    <div className="businessSidebarUser">
+                        <div className="sidebarAvatar">{displayName.charAt(0)}</div>
+                        <div>
+                            <strong>{displayName}</strong>
+                            <small>{session?.user?.email}</small>
                         </div>
-                    ))}
-
-                    {!contests.length && (
-                        <p className="emptyText">Ende nuk ke publikuar konkurs.</p>
-                    )}
-                </div>
-            </section>
-
-            <div className="businessGrid refinedBusinessGrid">
-                <section className="dashboardPanel businessAddPanel">
-                    <div className="panelTitleRow">
-                        <span className="panelIcon blueIcon">+</span>
-                        <h2>Shto punëtor</h2>
                     </div>
-                    <WorkerForm
-                        form={form}
-                        setForm={setForm}
-                        addWorker={addWorker}
-                        buttonText="Shto Punëtor"
+                    <button type="button" onClick={logOut}>Log out</button>
+                </div>
+            </aside>
+
+            <div className="businessDashboard">
+                <div id="panel" className="businessHeroPanel">
+                    <div className="businessHeroTop">
+                        <div>
+                            <p className="businessGreeting">Përshëndetje, <strong>{displayName}</strong></p>
+                            <h1>Paneli i Biznesit</h1>
+                            <p className="businessEmail">Këtu është një përmbledhje e biznesit tënd.</p>
+                        </div>
+                        <button type="button" className="businessSiteLink" onClick={publishBusinessSite}>
+                            Publiko mini site
+                        </button>
+                    </div>
+
+                    <div className="businessStatsGrid">
+                        <BusinessStat icon="P" tone="blue" value={workers.length} label="Punëtorë në sistem" />
+                        <BusinessStat icon="H" tone="green" value={totalHours} label="Orë normale" />
+                        <BusinessStat icon="OT" tone="yellow" value={totalOvertime} label="Orë overtime" />
+                        <BusinessStat icon="€" tone="purple" value={`${totalPayroll.toFixed(2)} €`} label="Paga totale" />
+                    </div>
+                </div>
+
+                <section id="mini-site" className="dashboardPanel businessSitePanel">
+                    <div className="payrollHeader">
+                        <div>
+                            <p className="eyebrow">Mini site biznesi</p>
+                            <h2>Faqja publike e biznesit</h2>
+                            <p>Kjo faqe hapet kur klienti klikon në rezultatin që është nga biznesi yt.</p>
+                        </div>
+                        <button type="button" className="businessSiteLink secondaryBusinessSiteLink" onClick={publishBusinessSite}>
+                            Publiko mini site
+                        </button>
+                    </div>
+
+                    <div className="businessSiteForm">
+                        <div className="businessSiteFieldCard">
+                            <input
+                                className="businessNameInput"
+                                placeholder="Emri i biznesit"
+                                value={businessSite.name}
+                                onChange={(e) => setBusinessSite({ ...businessSite, name: e.target.value })}
+                            />
+                            <input
+                                placeholder="Telefon"
+                                value={businessSite.phone}
+                                onChange={(e) => setBusinessSite({ ...businessSite, phone: e.target.value })}
+                            />
+                            <input
+                                placeholder="Email"
+                                value={businessSite.email}
+                                onChange={(e) => setBusinessSite({ ...businessSite, email: e.target.value })}
+                            />
+                        </div>
+                        <ImageUploadField
+                            label="Logo e biznesit"
+                            value={businessSite.logo_url}
+                            onChange={(file) => handleBusinessImageUpload('logo_url', file)}
+                        />
+                        <ImageUploadField
+                            label="Cover i biznesit"
+                            value={businessSite.cover_url}
+                            onChange={(file) => handleBusinessImageUpload('cover_url', file)}
+                        />
+                        <textarea
+                            className="businessAboutInput"
+                            placeholder="Përshkrimi i biznesit"
+                            value={businessSite.about}
+                            onChange={(e) => setBusinessSite({ ...businessSite, about: e.target.value })}
+                        />
+                    </div>
+
+                    <MiniSiteLinkBox
+                        title="Linku i mini-site të biznesit"
+                        path={businessMiniSitePath}
+                        onCopy={() => showAuthPopup?.('success', 'Linku u kopjua', 'Linku i mini-site u kopjua në clipboard.')}
                     />
                 </section>
 
-                <section className="dashboardPanel businessWorkersPanel">
-                    <div className="panelTitleRow">
-                        <span className="panelIcon greenIcon">P</span>
-                        <h2>Punëtorët e biznesit</h2>
-                    </div>
-                    <BusinessWorkerList
-                        workers={workers}
-                        deleteWorker={deleteWorker}
-                    />
-                </section>
-            </div>
-
-            <section className="dashboardPanel payrollPanel">
-                <div className="payrollHeader">
-                    <div>
-                        <p className="eyebrow">Paga dhe orë</p>
-                        <h2>Payroll i punëtorëve</h2>
-                        <p>Orari llogaritet automatikisht. Për punëtor me pagë fikse, përdoret paga fikse + overtime + bonus.</p>
+                <section id="konkurs" className="dashboardPanel businessContestPanel">
+                    <div className="payrollHeader">
+                        <div>
+                            <p className="eyebrow">Konkurse</p>
+                            <h2>Publiko konkurs</h2>
+                            <p>Konkurset që shton këtu shfaqen në homepage për kandidatët.</p>
+                        </div>
                     </div>
 
-                    <button type="button" className="addPayrollBtn">+ Shto pagë</button>
-                </div>
+                    <form className="contestForm" onSubmit={addContest}>
+                        <input
+                            placeholder="Titulli i konkursit"
+                            value={contestForm.title}
+                            onChange={(e) => setContestForm({ ...contestForm, title: e.target.value })}
+                        />
+                        <input
+                            placeholder="Lokacioni"
+                            value={contestForm.location}
+                            onChange={(e) => setContestForm({ ...contestForm, location: e.target.value })}
+                        />
+                        <input
+                            placeholder="Paga / pagesa"
+                            value={contestForm.salary}
+                            onChange={(e) => setContestForm({ ...contestForm, salary: e.target.value })}
+                        />
+                        <textarea
+                            placeholder="Përshkrimi i konkursit"
+                            value={contestForm.description}
+                            onChange={(e) => setContestForm({ ...contestForm, description: e.target.value })}
+                        />
+                        <button type="submit">Publiko konkurs</button>
+                    </form>
 
-                <div className="payrollTable">
-                    <div className="payrollRow payrollHead">
-                        <span>Punëtori</span>
-                        <span>Website</span>
-                        <span>Tipi</span>
-                        <span>Orë</span>
-                        <span>Paga fikse</span>
-                        <span>Overtime</span>
-                        <span>Bonus</span>
-                        <span>Total</span>
-                    </div>
-
-                    {payrollRows.map(({ worker, settings, total }) => (
-                        <div className="payrollRow" key={worker.id}>
-                            <div className="payrollWorkerCell">
-                                <WorkerAvatar worker={worker} />
+                    <div className="contestList">
+                        {contests.map(contest => (
+                            <div className="contestListItem" key={contest.id}>
                                 <div>
-                                    <strong>{worker.full_name}</strong>
-                                    <small>{worker.skill}</small>
+                                    <strong>{contest.title}</strong>
+                                    <p>{contest.location || 'Lokacion fleksibil'} · {contest.salary || 'Pagesa sipas marrëveshjes'}</p>
                                 </div>
+                                <button type="button" onClick={() => deleteContest(contest.id)}>Fshije</button>
                             </div>
+                        ))}
 
-                            <div className="payrollLinks stackedLinks">
-                                <Link to={`/workers/${worker.id}`}>Publike</Link>
-                                <Link to={`/workers/${worker.id}/edit`}>Edito</Link>
-                            </div>
+                        {!contests.length && (
+                            <p className="emptyText">Ende nuk ke publikuar konkurs.</p>
+                        )}
+                    </div>
+                </section>
 
-                            <select
-                                value={settings.payType}
-                                onChange={(e) => updatePayroll(worker, 'payType', e.target.value)}
-                            >
-                                <option value="hourly">Me orë</option>
-                                <option value="fixed">Pagë fikse</option>
-                            </select>
-
-                            <input
-                                type="number"
-                                min="0"
-                                placeholder="Orë"
-                                value={settings.hours}
-                                disabled={settings.payType === 'fixed'}
-                                onChange={(e) => updatePayroll(worker, 'hours', e.target.value)}
-                            />
-
-                            <input
-                                type="number"
-                                min="0"
-                                placeholder="Pagë fikse"
-                                value={settings.fixedSalary}
-                                disabled={settings.payType === 'hourly'}
-                                onChange={(e) => updatePayroll(worker, 'fixedSalary', e.target.value)}
-                            />
-
-                            <div className="overtimeInputs">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    placeholder="Orë OT"
-                                    value={settings.overtimeHours}
-                                    onChange={(e) => updatePayroll(worker, 'overtimeHours', e.target.value)}
-                                />
-                                <input
-                                    type="number"
-                                    min="0"
-                                    placeholder="€/OT"
-                                    value={settings.overtimeRate}
-                                    onChange={(e) => updatePayroll(worker, 'overtimeRate', e.target.value)}
-                                />
-                            </div>
-
-                            <input
-                                type="number"
-                                min="0"
-                                placeholder="Bonus"
-                                value={settings.bonus}
-                                onChange={(e) => updatePayroll(worker, 'bonus', e.target.value)}
-                            />
-
-                            <strong>{total.toFixed(2)} €</strong>
+                <div id="punetoret" className="businessGrid refinedBusinessGrid">
+                    <section className="dashboardPanel businessAddPanel">
+                        <div className="panelTitleRow">
+                            <span className="panelIcon blueIcon">+</span>
+                            <h2>Shto punëtor</h2>
                         </div>
-                    ))}
+                        <WorkerForm
+                            form={form}
+                            setForm={setForm}
+                            addWorker={addWorker}
+                            buttonText="Shto Punëtor"
+                        />
+                    </section>
+
+                    <section className="dashboardPanel businessWorkersPanel">
+                        <div className="panelTitleRow">
+                            <span className="panelIcon greenIcon">P</span>
+                            <h2>Punëtorët e biznesit</h2>
+                        </div>
+                        <BusinessWorkerList
+                            workers={workers}
+                            deleteWorker={deleteWorker}
+                        />
+                    </section>
                 </div>
-            </section>
+
+                <section id="payroll" className="dashboardPanel payrollPanel">
+                    <div className="payrollHeader">
+                        <div>
+                            <p className="eyebrow">Paga dhe orë</p>
+                            <h2>Payroll i punëtorëve</h2>
+                            <p>Orari llogaritet automatikisht. Për punëtor me pagë fikse, përdoret paga fikse + overtime + bonus.</p>
+                        </div>
+
+                        <button type="button" className="addPayrollBtn">+ Shto pagë</button>
+                    </div>
+
+                    <div className="payrollTable">
+                        <div className="payrollRow payrollHead">
+                            <span>Punëtori</span>
+                            <span>Website</span>
+                            <span>Tipi</span>
+                            <span>Orë</span>
+                            <span>Paga fikse</span>
+                            <span>Overtime</span>
+                            <span>Bonus</span>
+                            <span>Total</span>
+                        </div>
+
+                        {payrollRows.map(({ worker, settings, total }) => (
+                            <div className="payrollRow" key={worker.id}>
+                                <div className="payrollWorkerCell">
+                                    <WorkerAvatar worker={worker} />
+                                    <div>
+                                        <strong>{worker.full_name}</strong>
+                                        <small>{worker.skill}</small>
+                                    </div>
+                                </div>
+
+                                <div className="payrollLinks stackedLinks">
+                                    <Link to={`/workers/${worker.id}`}>Publike</Link>
+                                    <Link to={`/workers/${worker.id}/edit`}>Edito</Link>
+                                </div>
+
+                                <select
+                                    value={settings.payType}
+                                    onChange={(e) => updatePayroll(worker, 'payType', e.target.value)}
+                                >
+                                    <option value="hourly">Me orë</option>
+                                    <option value="fixed">Pagë fikse</option>
+                                </select>
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Orë"
+                                    value={settings.hours}
+                                    disabled={settings.payType === 'fixed'}
+                                    onChange={(e) => updatePayroll(worker, 'hours', e.target.value)}
+                                />
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Pagë fikse"
+                                    value={settings.fixedSalary}
+                                    disabled={settings.payType === 'hourly'}
+                                    onChange={(e) => updatePayroll(worker, 'fixedSalary', e.target.value)}
+                                />
+
+                                <div className="overtimeInputs">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="Orë OT"
+                                        value={settings.overtimeHours}
+                                        onChange={(e) => updatePayroll(worker, 'overtimeHours', e.target.value)}
+                                    />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="€/OT"
+                                        value={settings.overtimeRate}
+                                        onChange={(e) => updatePayroll(worker, 'overtimeRate', e.target.value)}
+                                    />
+                                </div>
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Bonus"
+                                    value={settings.bonus}
+                                    onChange={(e) => updatePayroll(worker, 'bonus', e.target.value)}
+                                />
+
+                                <strong>{total.toFixed(2)} €</strong>
+                            </div>
+                        ))}
+
+                        {!payrollRows.length && (
+                            <p className="emptyText">Shto punëtorë për të llogaritur payroll.</p>
+                        )}
+                    </div>
+                </section>
+            </div>
         </section>
     )
 }
@@ -1560,7 +1674,15 @@ function WorkerForm({ form, setForm, addWorker, buttonText }) {
             <input placeholder="Phone number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             <input placeholder="Profession" value={form.skill} onChange={(e) => setForm({ ...form, skill: e.target.value })} />
             <input placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-            <input placeholder="Hourly rate" value={form.hourly_rate} onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })} />
+            <input
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                placeholder="Hourly rate"
+                value={form.hourly_rate}
+                onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })}
+            />
 
             <button type="submit">{buttonText}</button>
         </form>
@@ -1596,13 +1718,17 @@ function WorkerProfile({ workers }) {
         return <h2>Profili nuk u gjet.</h2>
     }
 
-    const galleryImages = getProfileGalleryImages(worker, publicDashboard.photos || [])
+    const publicWorker = {
+        ...worker,
+        ...loadWorkerMiniSite(id)
+    }
+    const galleryImages = getProfileGalleryImages(publicWorker, publicDashboard.photos || [])
 
     return (
         <section className="profilePage publicProfilePage">
             <div className="publicCover">
-                {worker.cover_url ? (
-                    <img src={worker.cover_url} alt="" />
+                {publicWorker.cover_url ? (
+                    <img src={publicWorker.cover_url} alt="" />
                 ) : (
                     <div className="publicCoverFallback" />
                 )}
@@ -1611,17 +1737,17 @@ function WorkerProfile({ workers }) {
             <div className="publicProfileCard">
                 <div className="profileHeader publicProfileHeader">
                     <div className="publicAvatar">
-                        {worker.logo_url ? (
-                            <img src={worker.logo_url} alt="" />
+                        {publicWorker.logo_url ? (
+                            <img src={publicWorker.logo_url} alt="" />
                         ) : (
-                            <span>{worker.full_name?.charAt(0) || 'P'}</span>
+                            <span>{publicWorker.full_name?.charAt(0) || 'P'}</span>
                         )}
                     </div>
 
                     <div>
                         <p className="eyebrow">Punaflow Profile</p>
-                        <h1>{worker.website_title || worker.full_name}</h1>
-                        <p>{worker.skill} · {worker.location}</p>
+                        <h1>{publicWorker.website_title || publicWorker.full_name}</h1>
+                        <p>{publicWorker.skill} · {publicWorker.location}</p>
                         <span className="availableBadge">Available</span>
                     </div>
                 </div>
@@ -1629,18 +1755,18 @@ function WorkerProfile({ workers }) {
                 <div className="publicProfileGrid">
                     <div className="publicAbout">
                         <h2>Rreth profilit</h2>
-                        <p>{worker.about || 'Nuk ka përshkrim ende.'}</p>
+                        <p>{publicWorker.about || 'Nuk ka përshkrim ende.'}</p>
 
                         <h2>Shërbimet</h2>
-                        <p>{worker.service_description || 'Ende nuk ka përshkrim shërbimesh.'}</p>
+                        <p>{publicWorker.service_description || 'Ende nuk ka përshkrim shërbimesh.'}</p>
                     </div>
 
                     <aside className="profilePrice publicContactCard">
-                        <h3>{worker.hourly_rate} € / orë</h3>
-                        <p>{worker.email}</p>
-                        <p>{worker.phone}</p>
+                        <h3>{publicWorker.hourly_rate} € / orë</h3>
+                        <p>{publicWorker.email}</p>
+                        <p>{publicWorker.phone}</p>
 
-                        <Link to={`/workers/${worker.id}/edit`} className="editProfileBtn">
+                        <Link to={`/workers/${publicWorker.id}/edit`} className="editProfileBtn">
                             Edito mini website
                         </Link>
                     </aside>
@@ -1863,19 +1989,21 @@ function MiniWebsiteEditor({ workers, fetchWorkers }) {
     useEffect(() => {
         if (worker) {
             queueMicrotask(() => {
+                const savedMiniSite = loadWorkerMiniSite(id)
+
                 setMiniSite({
-                    logo_url: worker.logo_url || '',
-                    cover_url: worker.cover_url || '',
-                    website_title: worker.website_title || '',
-                    about: worker.about || '',
-                    service_description: worker.service_description || '',
-                    portfolio_image_1: worker.portfolio_image_1 || '',
-                    portfolio_image_2: worker.portfolio_image_2 || '',
-                    portfolio_image_3: worker.portfolio_image_3 || ''
+                    logo_url: savedMiniSite.logo_url || worker.logo_url || '',
+                    cover_url: savedMiniSite.cover_url || worker.cover_url || '',
+                    website_title: savedMiniSite.website_title || worker.website_title || '',
+                    about: savedMiniSite.about || worker.about || '',
+                    service_description: savedMiniSite.service_description || worker.service_description || '',
+                    portfolio_image_1: savedMiniSite.portfolio_image_1 || worker.portfolio_image_1 || '',
+                    portfolio_image_2: savedMiniSite.portfolio_image_2 || worker.portfolio_image_2 || '',
+                    portfolio_image_3: savedMiniSite.portfolio_image_3 || worker.portfolio_image_3 || ''
                 })
             })
         }
-    }, [worker])
+    }, [id, worker])
 
     if (!workers.length) {
         return <h2>Duke ngarkuar profilin...</h2>
@@ -1902,8 +2030,8 @@ function MiniWebsiteEditor({ workers, fetchWorkers }) {
         reader.readAsDataURL(file)
     }
 
-    async function saveMiniSite(e) {
-        e.preventDefault()
+    async function saveMiniSite(publish = false) {
+        localStorage.setItem(`punaflow-worker-minisite-${worker.id}`, JSON.stringify(miniSite))
 
         const { error } = await supabase
             .from('workers')
@@ -1914,13 +2042,21 @@ function MiniWebsiteEditor({ workers, fetchWorkers }) {
             .eq('id', worker.id)
 
         if (error) {
-            alert(error.message)
-            return
+            console.warn(error.message)
         }
 
-        alert('Mini website u ruajt.')
+        alert(publish ? 'Mini website u publikua.' : 'Mini website u ruajt.')
         await fetchWorkers()
-        navigate(`/workers/${worker.id}/dashboard`)
+        navigate(`/workers/${worker.id}`)
+    }
+
+    function handleSaveMiniSite(e) {
+        e.preventDefault()
+        saveMiniSite(false)
+    }
+
+    function handlePublishMiniSite() {
+        saveMiniSite(true)
     }
 
     return (
@@ -1931,7 +2067,7 @@ function MiniWebsiteEditor({ workers, fetchWorkers }) {
                 <p>Këtu shton logon, cover-in, përshkrimin dhe fotot e punëve.</p>
             </div>
 
-            <form onSubmit={saveMiniSite}>
+            <form onSubmit={handleSaveMiniSite}>
                 <ImageUploadField
                     label="Logo"
                     value={miniSite.logo_url}
@@ -1968,6 +2104,9 @@ function MiniWebsiteEditor({ workers, fetchWorkers }) {
                 />
 
                 <button type="submit">Ruaj mini website</button>
+                <button type="button" className="publishMiniSiteBtn" onClick={handlePublishMiniSite}>
+                    Publiko mini site
+                </button>
             </form>
         </section>
     )
@@ -2469,6 +2608,28 @@ function loadBusinessSite(storageKey) {
         return {
             ...fallback,
             ...JSON.parse(localStorage.getItem(storageKey) || '{}')
+        }
+    } catch {
+        return fallback
+    }
+}
+
+function loadWorkerMiniSite(workerId) {
+    const fallback = {
+        logo_url: '',
+        cover_url: '',
+        website_title: '',
+        about: '',
+        service_description: '',
+        portfolio_image_1: '',
+        portfolio_image_2: '',
+        portfolio_image_3: ''
+    }
+
+    try {
+        return {
+            ...fallback,
+            ...JSON.parse(localStorage.getItem(`punaflow-worker-minisite-${workerId}`) || '{}')
         }
     } catch {
         return fallback
