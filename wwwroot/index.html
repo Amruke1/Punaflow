@@ -1,0 +1,347 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Punaflow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #020617);
+            color: #e2e8f0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+            nav button, button {
+                padding: 10px 16px;
+                border: none;
+                background: linear-gradient(135deg, #6366f1, #22c55e);
+                color: white;
+                border-radius: 10px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: 0.2s;
+            }
+
+                nav button:hover, button:hover {
+                    transform: scale(1.05);
+                }
+
+        section {
+            display: none;
+        }
+
+            section.active {
+                display: block;
+            }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.07);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 12px;
+            margin: 6px 0;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+
+            input:focus {
+                outline: 2px solid #6366f1;
+            }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+            form button {
+                grid-column: span 2;
+            }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        th {
+            color: #a5b4fc;
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .delete {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .profileBox {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(99,102,241,0.15);
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <nav>
+            <button onclick="showSection('home')">Homepage</button>
+            <button onclick="showSection('workers')">All Workers</button>
+            <button onclick="showSection('admin')">Admin Panel</button>
+        </nav>
+
+        <section id="home" class="active">
+            <h1>Find the right worker for your home or small business</h1>
+            <p class="subtitle">Connect with skilled workers in your area.</p>
+
+            <div class="card">
+                <h3>What can you do with Punaflow?</h3>
+                <p>Search for independent workers by skill, location, or name.</p>
+                <p>Example: electrician, cleaner, designer, Prishtina.</p>
+            </div>
+
+            <input type="text" id="homeSearch" placeholder="Search skill, name, or location...">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Skill</th>
+                        <th>Location</th>
+                        <th>Rate</th>
+                        <th>Profile</th>
+                    </tr>
+                </thead>
+                <tbody id="homeWorkersTable"></tbody>
+            </table>
+
+            <div id="profileBox" class="profileBox"></div>
+        </section>
+
+        <section id="workers">
+            <h1>All Workers</h1>
+            <p class="subtitle">Browse all available worker profiles.</p>
+
+            <input type="text" id="workersSearch" placeholder="Search all workers...">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Skill</th>
+                        <th>Location</th>
+                        <th>Rate</th>
+                        <th>Profile</th>
+                    </tr>
+                </thead>
+                <tbody id="allWorkersTable"></tbody>
+            </table>
+        </section>
+
+        <section id="admin">
+            <h1>Admin Panel</h1>
+            <p class="subtitle">Small businesses can add and manage worker profiles here.</p>
+
+            <form id="workerForm">
+                <input id="fullName" placeholder="Worker full name" required>
+                <input id="email" placeholder="Email" required>
+                <input id="skill" placeholder="Skill" required>
+                <input id="location" placeholder="Location" required>
+                <input id="hourlyRate" type="number" placeholder="Hourly rate" required>
+                <button type="submit">Add Worker</button>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Skill</th>
+                        <th>Location</th>
+                        <th>Rate</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="adminWorkersTable"></tbody>
+            </table>
+        </section>
+
+    </div>
+
+    <script>
+        const apiUrl = "/api/workers";
+
+        function showSection(id) {
+            document.querySelectorAll("section").forEach(section => {
+                section.classList.remove("active");
+            });
+            document.getElementById(id).classList.add("active");
+        }
+
+        async function getWorkers() {
+            const res = await fetch(apiUrl);
+            return await res.json();
+        }
+
+        function filterWorkers(workers, filter) {
+            return workers.filter(w =>
+                w.fullName.toLowerCase().includes(filter.toLowerCase()) ||
+                w.skill.toLowerCase().includes(filter.toLowerCase()) ||
+                w.location.toLowerCase().includes(filter.toLowerCase())
+            );
+        }
+
+        function workerRow(w) {
+            return `
+        <tr>
+          <td>${w.fullName}</td>
+          <td>${w.skill}</td>
+          <td>${w.location}</td>
+          <td>${w.hourlyRate} €</td>
+          <td><button onclick='showProfile(${JSON.stringify(w)})'>View Profile</button></td>
+        </tr>`;
+        }
+
+        async function loadHomeWorkers(filter = "") {
+            const workers = filterWorkers(await getWorkers(), filter);
+            const table = document.getElementById("homeWorkersTable");
+            table.innerHTML = "";
+            workers.forEach(w => table.innerHTML += workerRow(w));
+        }
+
+        async function loadAllWorkers(filter = "") {
+            const workers = filterWorkers(await getWorkers(), filter);
+            const table = document.getElementById("allWorkersTable");
+            table.innerHTML = "";
+            workers.forEach(w => table.innerHTML += workerRow(w));
+        }
+
+        async function loadAdminWorkers() {
+            const workers = await getWorkers();
+            const table = document.getElementById("adminWorkersTable");
+            table.innerHTML = "";
+
+            workers.forEach(w => {
+                table.innerHTML += `
+          <tr>
+            <td>${w.fullName}</td>
+            <td>${w.email}</td>
+            <td>${w.skill}</td>
+            <td>${w.location}</td>
+            <td>${w.hourlyRate} €</td>
+            <td><button class="delete" onclick="deleteWorker(${w.id})">Delete</button></td>
+          </tr>`;
+            });
+        }
+
+        function showProfile(w) {
+            const box = document.getElementById("profileBox");
+            box.style.display = "block";
+            box.innerHTML = `
+        <h3>${w.fullName}</h3>
+        <p><strong>Email:</strong> ${w.email}</p>
+        <p><strong>Skill:</strong> ${w.skill}</p>
+        <p><strong>Location:</strong> ${w.location}</p>
+        <p><strong>Hourly Rate:</strong> ${w.hourlyRate} €</p>
+        <p>This worker profile can be used by clients or small businesses to find suitable help.</p>
+      `;
+        }
+
+        document.getElementById("homeSearch").addEventListener("input", e => {
+            loadHomeWorkers(e.target.value);
+        });
+
+        document.getElementById("workersSearch").addEventListener("input", e => {
+            loadAllWorkers(e.target.value);
+        });
+
+        document.getElementById("workerForm").addEventListener("submit", async e => {
+            e.preventDefault();
+
+            const worker = {
+                fullName: fullName.value,
+                email: email.value,
+                skill: skill.value,
+                location: location.value,
+                hourlyRate: Number(hourlyRate.value)
+            };
+
+            await fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(worker)
+            });
+
+            e.target.reset();
+            loadAll();
+        });
+
+        async function deleteWorker(id) {
+            await fetch(`${apiUrl}/${id}`, {
+                method: "DELETE"
+            });
+            loadAll();
+        }
+
+        function loadAll() {
+            loadHomeWorkers(document.getElementById("homeSearch").value);
+            loadAllWorkers(document.getElementById("workersSearch").value);
+            loadAdminWorkers();
+        }
+
+        loadAll();
+    </script>
+
+</body>
+</html>

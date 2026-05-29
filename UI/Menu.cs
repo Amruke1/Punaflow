@@ -102,6 +102,12 @@ namespace Punaflow.UI
                 Console.Write("Emri: ");
                 user.Name = Console.ReadLine();
 
+                if (string.IsNullOrWhiteSpace(user.Name))
+                {
+                    Console.WriteLine("Emri nuk mund të jetë bosh.");
+                    return;
+                }
+
                 Console.Write("Email: ");
                 user.Email = Console.ReadLine();
 
